@@ -5,5 +5,5 @@
 </template>
 
 <script lang="ts" setup>
-import { Provider, Viewer } from './components'
+import { Provider, Viewer } from './components';
 </script>

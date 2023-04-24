@@ -1,18 +1,36 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+    "target": "es2017",
+    "module": "ESNext",
+    "strict":true,
+    "removeComments": false,
+    "preserveConstEnums": false,
     "moduleResolution": "node",
-    "strict": true,
-    "esModuleInterop": true
+    "experimentalDecorators": true,
+    "noImplicitAny": true,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "lib",
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "rootDir": ".",
+    "jsx": "preserve",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "@/*": ["src/*"],
+      "@mock/*": ["mock/*"],
+    },
+    "typeRoots": [
+      "node_modules/@types"
+    ]
   },
   "include": [
-    "api/**/*.ts",
-    "mock/**/*.ts",
-    "mock/**/*.d.ts",
-    "src/**/*.ts",
-    "src/**/*.d.ts",
-    "src/**/*.vue",
-    "vite.config.ts"
-  ]
+    "./src",
+    "./types",
+    "./mock",
+  ],
+  "compileOnSave": false
 }

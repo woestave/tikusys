@@ -12,7 +12,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.request.can = function (role: Role) {
-  return this.user != null && this.user.role >= role
+  return !!this.user && this.user.role <= role
 }
 
 // // delay response

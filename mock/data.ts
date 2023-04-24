@@ -1,10 +1,11 @@
 export const uuid = (): string => Date.now().toString(16) + Math.floor((1 + Math.random()) * 0x10000).toString(16)
 
 export enum Role {
-  user,
-  staff,
-  admin,
-  owner
+  owner = 0,
+  admin = 1,
+  staff = 2,
+  user = 3,
+  visitor = 4,
 }
 
 export interface User {

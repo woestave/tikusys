@@ -3,9 +3,9 @@ import { users, tokens, uuid } from './data'
 
 const router = Router()
 
-const genToken = (): string => uuid() + uuid()
+const genToken = () => uuid() + uuid()
 
-const accessTokenLifetime = 10 * 60 * 1000 // 10 minutes
+const accessTokenLifetime = 60 * 60 * 24 * 1000 // 1 day
 
 router.post('/token', (req, res) => {
   // eslint-disable-next-line @typescript-eslint/naming-convention

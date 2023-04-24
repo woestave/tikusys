@@ -1,5 +1,7 @@
 <template>
-  <n-icon v-bind="props"><icon /></n-icon>
+  <n-icon v-bind="props">
+    <icon />
+  </n-icon>
 </template>
 
 <script lang="ts" setup>
@@ -21,10 +23,48 @@ import {
   HelpCircleOutline as help,
   NotificationsOutline as notifications,
   LogoGithub as github,
-  AlertCircleOutline as fallback
-} from '@vicons/ionicons5'
+  AlertCircleOutline as fallback,
+  Newspaper,
+  BarChart,
+  AddCircleSharp,
+  PieChartSharp,
+  PodiumSharp,
+  ListSharp,
+  DocumentText,
+  AddCircle,
+  Pencil,
+  Library,
+} from '@vicons/ionicons5';
 
-const icons = { refresh, dashboard, posts, pages, media, users, comments, themes, plugins, tools, settings, flask, add, help, notifications, github, fallback }
+const icons = {
+  refresh,
+  dashboard,
+  posts,
+  pages,
+  media,
+  users,
+  comments,
+  themes,
+  plugins,
+  tools,
+  settings,
+  flask,
+  add,
+  help,
+  notifications,
+  github,
+  fallback,
+  Newspaper,
+  BarChart,
+  AddCircleSharp,
+  PieChartSharp,
+  PodiumSharp,
+  ListSharp,
+  DocumentText,
+  AddCircle,
+  Pencil,
+  Library,
+};
 
 type IconTypes = keyof typeof icons
 

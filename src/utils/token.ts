@@ -28,6 +28,7 @@ const createTask = async (): Promise<string | undefined> => {
     const options = { prefixUrl, method: 'post', json: { grant_type: 'refresh_token', refresh_token: token.refresh } }
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { token_type, access_token, refresh_token, expires_in } = await ky('auth/token', options).json<TokenResult>()
+    alert('settoken1-' +  Date.now() + expires_in * 1000);
     set('token', { type: token_type, access: access_token, refresh: refresh_token, expires: Date.now() + expires_in * 1000 })
     return `${token_type} ${access_token}`
   } catch {
@@ -62,6 +63,7 @@ export const authenticate = async (username: string, password: string): Promise<
     refresh: refresh_token,
     expires: Date.now() + expires_in * 1000
   }
+  alert('settoken2-' +  token.expires);
   set('token', token)
   return token
 }
