@@ -1,7 +1,7 @@
 // import { pipe, tap } from 'ramda';
 import { defineComponent, SetupContext, EmitsOptions, VNodeChild, reactive, toRefs, ref, Ref } from 'vue';
 
-interface FunctionalComponentInternal {
+export interface FunctionalComponentInternal {
   context: SetupContext<EmitsOptions>;
 }
 

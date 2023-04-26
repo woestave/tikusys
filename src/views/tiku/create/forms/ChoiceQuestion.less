@@ -1,18 +1,21 @@
-.tiku-create-single-question-form {
+.choice-question-form {
+
   .drag-area {
+    padding-bottom: 8px;
     margin-bottom: 24px;
     border-radius: 4px;
     // padding-top: 24px;
     padding-right: 24px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
   }
   .drag-header {
-    // padding-top: 16px;
-    // margin-bottom: 24px;
-    // display: flex;
-    // flex-direction: row;
-    // align-items: center;
-    // justify-content: space-between;
+
+    .n-form-item-label__text {
+      font-size: 12px;
+      font-weight: 600;
+      color: gray;
+      user-select: none;
+    }
     .drag-header-right {
       margin: 0 0 0 auto;
       // padding-right: 16px;
@@ -20,6 +23,12 @@
       font-weight: 600;
       color: gray;
       cursor: default;
+      user-select: none;
+
+      .have-no-right-err {
+        font-weight: 400;
+        color: var(--n-feedback-text-color-error);
+      }
     }
   }
   .draggable-handle {

@@ -32,6 +32,13 @@ const mock = (): Plugin => ({
 export default defineConfig({
   plugins: [
     vue(),
+    /**
+     * jsx-if插件必须放到vueJSX()上面。
+     * 否则vueJSX编译过后，jsx-if插件就找不到<If></If>标签了。
+     */
+    vueJSX({
+      babelPlugins: [require('./babel-plugin-vue-jsx-if')],
+    }),
     vueJSX(),
     mock(),
   ],

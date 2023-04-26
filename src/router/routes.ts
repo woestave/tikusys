@@ -25,7 +25,34 @@ const mainRoutes: RouteRecordRaw[] = [
     path: '/tiku/create',
     component: () => import('@/views/tiku/create/Create'),
     meta: {
-      title: '题库 - 创建',
+      title: '题库 - 添加',
+      requiresAuth: true,
+    },
+  },
+  {
+    name: 'exampaper-create',
+    path: '/exampaper/create',
+    component: () => import('@/views/exampaper/create/Create'),
+    meta: {
+      title: '试卷 - 生成',
+      requiresAuth: true,
+    },
+  },
+  {
+    name: 'teacher-grading',
+    path: '/teacher/grading',
+    component: () => import('@/views/teacher/grading/Grading'),
+    meta: {
+      title: '老师 - 阅卷',
+      requiresAuth: true,
+    },
+  },
+  {
+    name: 'tiku-list',
+    path: '/tiku/list',
+    component: () => import('@/views/tiku/list/List'),
+    meta: {
+      title: '题库 - 列表',
       requiresAuth: true,
     },
   },

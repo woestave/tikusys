@@ -47,7 +47,7 @@ router.get('/', (req, res) => {
           id: 'teacher-grading',
           label: '老师阅卷',
           // icon: 'Pencil',
-          routeName: 'exampaper-grading',
+          routeName: 'teacher-grading',
         },
         {
           id: 'tiku-list',

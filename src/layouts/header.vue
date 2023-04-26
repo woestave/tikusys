@@ -85,7 +85,7 @@ const handleOptionsSelect = async (key: unknown): Promise<void> => {
 .n-layout-header {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   align-items: center;
   padding: 9px 18px;
