@@ -1,10 +1,17 @@
 <template>
-  <router-view />
+  <LoadingView>
+    <router-view />
+  </LoadingView>
 </template>
 
 <script lang="ts" setup>
 import { useLoadingBar } from 'naive-ui'
-import router from '../router'
+import { globalLoading } from '@/utils/create-loading';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const LoadingView = globalLoading.LoadingView;
 
 // todo: route transtion
 

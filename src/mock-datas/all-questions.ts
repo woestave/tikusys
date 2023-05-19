@@ -1,5 +1,5 @@
-import { genChoiceModel, getPartialChoiceQuestionModel } from "@/model/question-model-choice";
-import { getPartialShortQuestionModel } from "@/model/question-model-short";
+import { genChoiceModel, getPartialChoiceQuestionModel } from "common-packages/models/question-model-choice";
+import { getPartialShortQuestionModel } from "common-packages/models/question-model-short";
 
 let n = 1;
 function inc () {
@@ -110,7 +110,7 @@ export const getAllQuestions = () => [
     id: n,
     tName: '测试单选题' + inc(),
     scoreValue: 1,
-    phase: 3,
+    phase: 4,
     customQuestionInfo: {
       choices: [
         genChoiceModel('语文'),
@@ -124,7 +124,7 @@ export const getAllQuestions = () => [
     id: n,
     tName: '测试单选题' + inc(),
     scoreValue: 1,
-    phase: 3,
+    phase: 6,
     customQuestionInfo: {
       choices: [
         genChoiceModel('语文'),

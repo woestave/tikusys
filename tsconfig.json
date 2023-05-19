@@ -4,7 +4,7 @@
     "module": "ESNext",
     "strict":true,
     "removeComments": false,
-    "preserveConstEnums": false,
+    "preserveConstEnums": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "noImplicitAny": true,
@@ -21,7 +21,9 @@
     "resolveJsonModule": true,
     "paths": {
       "@/*": ["src/*"],
-      "@mock/*": ["mock/*"],
+      "@mock/*": ["mock-1/*"],
+      // "@server/*": ["server/src/*"],
+      "common-packages/*": ["common-packages/*"],
     },
     "typeRoots": [
       "node_modules/@types"
@@ -30,7 +32,9 @@
   "include": [
     "./src",
     "./types",
-    "./mock",
-  ],
+    "mock-1",
+    "./server/src/@types",
+    "common-packages",
+],
   "compileOnSave": false
 }

@@ -1,0 +1,56 @@
+.examing {
+  position: relative;
+
+  .countdown {
+    position: fixed;
+    z-index: 2;
+    right: 0;
+    top: 50px;
+    padding: 24px;
+    pointer-events: none;
+    background: var(--n-color);
+    box-shadow: 0 0 3px 1px rgb(12, 12, 12);
+    h1 {
+      margin-bottom: 0;
+    }
+  }
+
+
+  .single-question-list {
+    .n-radio-group__splitor--checked {
+      display: none;
+    }
+    .single-question-radio-button {
+      &.right {
+        background: var(--n-button-color-active);
+        color: var(--n-button-text-color-active);
+        border-color: var(--n-button-border-color-active);
+      }
+      &.wrong {
+        background: #b22222;
+        border-color: #b22222;
+      }
+    }
+  }
+  .multi-question-list {
+    .multi-question-checkbox {
+      &.right .n-checkbox-box__border {
+        border: var(--n-border-checked);
+        opacity: 0.5;
+      }
+      &.wrong .n-checkbox-box__border {
+        border: 1px solid #b22222;
+        opacity: 0.5;
+      }
+    }
+  }
+
+
+  .fotm-actions {
+    padding: 32px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+  }
+}

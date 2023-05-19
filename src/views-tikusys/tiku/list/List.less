@@ -1,0 +1,22 @@
+.tiku-list {
+  .reference-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+
+    .reference-tag:not(:first) {
+      margin-left: 6px;
+    }
+  }
+
+  .hover-type-info {
+    &:hover,
+    &:active,
+    &:visited,
+    &:focus {
+      color: rgba(112, 192, 232, 0.7);
+    }
+  }
+}

@@ -60,7 +60,7 @@ export function useNotificationWithDuration (options: {
 
 export function useNotificationPreset1 (title: string, actionText: string) {
   return useNotificationWithDuration({
-    closable: false,
+    closable: true,
     getTitle (leftTime) {
       return `${title}(${leftTime})`;
     },

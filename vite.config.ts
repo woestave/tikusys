@@ -6,15 +6,18 @@
 import { defineConfig, Plugin } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import vueJSX from '@vitejs/plugin-vue-jsx';
-import mockApp from './mock';
+// import mockApp from './mock';
+import path from 'path';
 
-const mock = (): Plugin => ({
-  name: 'mock',
-  configureServer: async server => {
-    // mount mock server, `/api` is the base url
-    server.middlewares.use('/api', mockApp);
-  },
-})
+// const mock = (): Plugin => ({
+//   name: 'mock',
+//   configureServer: async server => {
+//     // mount mock server, `/mock` is the base url
+//     server.middlewares.use('/mock', mockApp);
+//   },
+// });
+
+const DEF_PROXY_URL = 'http://localhost:4000';
 
 // for parse sfc custom blocks
 // https://github.com/vitejs/vite/tree/main/packages/plugin-vue#example-for-transforming-custom-blocks
@@ -30,6 +33,8 @@ const mock = (): Plugin => ({
 // })
 
 export default defineConfig({
+  // root: '/',
+  // base: '/',
   plugins: [
     vue(),
     /**
@@ -40,21 +45,25 @@ export default defineConfig({
       babelPlugins: [require('./babel-plugin-vue-jsx-if')],
     }),
     vueJSX(),
-    mock(),
   ],
   build: {
     rollupOptions: {
+      input: {
+        tikusys: path.resolve(__dirname, 'tikusys.html'),
+        examsys: path.resolve(__dirname, 'examsys.html'),
+      },
       output: {
         manualChunks: {
           'naive-ui': ['naive-ui']
         }
       }
-    }
+    },
   },
   resolve: {
     alias: {
       '@': '/src',
       '@mock': '/mock',
+      'common-packages': '/common-packages',
     },
   },
   css: {
@@ -65,6 +74,16 @@ export default defineConfig({
     },
     modules: {
       generateScopedName: `_[name]_[local]_[hash:base64:6]_`,
+    },
+  },
+  server: {
+    cors: true,
+    host: true,
+    proxy: {
+      '/api': {
+        target: DEF_PROXY_URL,
+        changeOrigin: true,
+      },
     },
   },
 })

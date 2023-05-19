@@ -1,0 +1,48 @@
+.exampaper-create {
+
+  .exampaper-form {
+    //
+    box-sizing: border-box;
+
+    @keyframes flash {
+      0% { opacity: 1; }
+      50% { opacity: 0.35; }
+      100% { opacity: 1; }
+    }
+
+    .scores-row {
+      .scores-text {
+        color:#63e2b7;
+      }
+      &.warn {
+        .scores-popover-wrap {
+          // cursor: n-resize;
+          cursor: help;
+        }
+        .scores-text {
+          // color: #f2c97d;
+          color: #e88080;
+          text-decoration: line-through;
+        }
+      }
+      .scores-popover-wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .scores-warn-icon {
+        margin-right: 8px;
+        // animation: 2s flash infinite;
+      }
+    }
+
+    .exam-date {
+      width: 100%;
+    }
+  }
+}
+
+.n-base-select-option:hover .hover-eye-icon,
+.n-base-selection-tag-wrapper:hover .hover-eye-icon {
+  opacity: 1;
+}

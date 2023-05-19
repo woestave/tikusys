@@ -1,5 +1,5 @@
 import { useState } from '@/utils/functional-component';
-import { Role } from '@mock/data';
+import { Role } from 'mock-1/data';
 import { defineStore } from 'pinia';
 
 // export enum Role {

@@ -34,7 +34,12 @@ import {
   AddCircle,
   Pencil,
   Library,
+  PeopleSharp,
 } from '@vicons/ionicons5';
+import {
+  ClassFilled,
+  PasswordFilled,
+} from '@vicons/material';
 
 const icons = {
   refresh,
@@ -64,6 +69,9 @@ const icons = {
   AddCircle,
   Pencil,
   Library,
+  PeopleSharp,
+  ClassFilled,
+  PasswordFilled,
 };
 
 type IconTypes = keyof typeof icons

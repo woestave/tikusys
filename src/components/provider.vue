@@ -1,5 +1,5 @@
 <template>
-  <n-config-provider :theme="theme">
+  <n-config-provider :theme="theme" :locale="zhCN" :date-locale="dateZhCN">
     <n-global-style />
     <NNotificationProvider>
       <n-loading-bar-provider>
@@ -15,9 +15,10 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useOsTheme, darkTheme, NNotificationProvider } from 'naive-ui'
+import { useOsTheme, darkTheme, NNotificationProvider, NConfigProvider, zhCN, dateZhCN, } from 'naive-ui'
 
 const osTheme = useOsTheme()
 
-const theme = computed(() => (osTheme.value === 'dark' ? darkTheme : null))
+// const theme = computed(() => (osTheme.value === 'dark' ? darkTheme : null))
+const theme = computed(() => darkTheme);
 </script>
