@@ -22,11 +22,20 @@ export function createTextHighlightProcessor (options: {
   `;
   document.head.appendChild(sty);
 
+  const empty = document.createElement('div');
+
   function highlightProcessor (text: string, search?: string) {
     const hl = search?.trim();
     const tag = options.tag || 'span';
 
-    return hl ? text.replace(hl, `<${tag} class="global--text-highlight ${key} ${options.className || ''}">${hl}</${tag}>`) : text;
+    const uuid = key + '_' + Math.random() * 100000;
+
+    empty.innerText = hl ? text.replace(hl, uuid) : text;
+
+    const res = empty.innerHTML;
+    empty.innerText = hl || '';
+    const hlEscaped = empty.innerHTML;
+    return hl ? res.replace(uuid, `<${tag} class="global--text-highlight ${key} ${options.className || ''}">${hlEscaped}</${tag}>`) : res;
   }
 
   highlightProcessor.options = options;

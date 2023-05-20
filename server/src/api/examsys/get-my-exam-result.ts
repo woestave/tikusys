@@ -1,6 +1,7 @@
 import { Tables } from '#/mysql/tables';
 import { routePOST } from '#/routes/route';
 import { responseStructPresets } from '#/utils/response-struct';
+import querystring from 'node:querystring';
 
 export default routePOST<API__Examsys__User.GetMyExamResultReq, API__Examsys__User.GetMyExamResultRes>((context) => {
   const userInfo = context.state.user as API__Examsys__User.GetUserInfoRes['userInfo'];
@@ -20,8 +21,9 @@ export default routePOST<API__Examsys__User.GetMyExamResultReq, API__Examsys__Us
   return F
     .exec()
     .then(([myExamResult]) => {
-      return {
+      return myExamResult ? {
         ...myExamResult || {},
-      };
+        examResultAnswerInfo: JSON.parse(querystring.unescape(myExamResult.examResultAnswerInfo)) as API__ExamResult.ExamResultAnswerInfoParsed,
+      } : null;
     });
 });

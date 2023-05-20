@@ -57,13 +57,8 @@ export default functionalComponent(() => {
   examResultPromise.then((examResult) => {
     console.log(examResult);
     // if (examResult && typeof examResult.examResultAnswerInfo === 'object') {
-    if (examResult && typeof examResult.examResultAnswerInfo === 'string') {
-      answer.value = JSON.parse(
-        examResult
-        .examResultAnswerInfo
-        .replace(/\n/g, '\\n')
-        .replace(/\r/g, '\\r')
-      );
+    if (examResult) {
+      answer.value = examResult.examResultAnswerInfo;
       submitted.value = true;
       examResultModal.value = true;
     }
@@ -84,7 +79,7 @@ export default functionalComponent(() => {
 
   const answer = ref<Record<number, number[] | number | string>>({});
 
-  window.setAnswer = function (__arg: string | object) {
+  (window as any).setAnswer = function (__arg: string | object) {
     if (typeof __arg === 'string') {
       try {
         const parsed = JSON.parse(__arg.replace(/\n/g, '\\n').replace(/\r/g, '\\r'));
@@ -316,6 +311,7 @@ export default functionalComponent(() => {
                       label={y.label}
                       class={{
                         'single-question-radio-button': true,
+                        answered: x.id in answer.value,
                         wrong: submitted.value && !y.right && yi === answer.value[x.id],
                         right: submitted.value && y.right,
                       }}
@@ -347,6 +343,7 @@ export default functionalComponent(() => {
                       label={y.label}
                       class={{
                         'multi-question-checkbox': true,
+                        answered: x.id in answer.value,
                         wrong: submitted.value && !y.right && (answer.value[x.id] as number[])?.includes(yi),
                         right: submitted.value && y.right,
                       }}

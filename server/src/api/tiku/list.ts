@@ -1,6 +1,7 @@
 import { Tables } from '#/mysql/tables';
 import { routePOST } from '#/routes/route';
 import { prop } from 'ramda';
+import querystring from 'querystring';
 
 
 export default routePOST<API__Tiku.ListReq, API__Tiku.ListRes>(async (context) => {
@@ -23,14 +24,16 @@ export default routePOST<API__Tiku.ListReq, API__Tiku.ListRes>(async (context) =
   //   return res[0];
   // });
 
+  const tName = querystring.escape(body.tName || '');
+
   const F = Tables
     .Tiku
     .select()
     .where(Tables.Tiku.getTableFieldName('id'), 'like', `%${(body.id || '').replace(/^0+/, '').trim()}%`)
     .groupStart()
-    .where(Tables.Tiku.getTableFieldName('tName'), 'like', `%${body.tName || ''}%`)
+    .where(Tables.Tiku.getTableFieldName('tName'), 'like', `%${tName}%`)
     .or()
-    .where(Tables.Tiku.getTableFieldName('customQuestionInfo'), 'like', `%${body.tName || ''}%`)
+    .where(Tables.Tiku.getTableFieldName('customQuestionInfo'), 'like', `%${tName}%`)
     .groupEnd()
     .where(Tables.Tiku.getTableFieldName('phase'), 'in', body.phase)
     .where(Tables.Tiku.getTableFieldName('major'), '=', body.major)
@@ -77,7 +80,9 @@ export default routePOST<API__Tiku.ListReq, API__Tiku.ListRes>(async (context) =
           .then((res) => {
             const list: API__Tiku.TikuStructWithPaperInfo[] = tikuList.map((x) => ({
               ...x,
+              tName: querystring.unescape(x.tName || ''),
               paperInfo: res.filter((y) => y.tikuId === x.id),
+              customQuestionInfo: JSON.parse(querystring.unescape(x.customQuestionInfo as any as string)),
             }));
             return {
               list,

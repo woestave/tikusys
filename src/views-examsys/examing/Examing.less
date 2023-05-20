@@ -22,9 +22,12 @@
     }
     .single-question-radio-button {
       &.right {
-        background: var(--n-button-color-active);
-        color: var(--n-button-text-color-active);
-        border-color: var(--n-button-border-color-active);
+        // background: var(--n-button-color-active);
+        // color: var(--n-button-text-color-active);
+        // border-color: var(--n-button-border-color-active);
+        &:not(.answered) {
+          color: var(--n-button-color-active);
+        }
       }
       &.wrong {
         background: #b22222;

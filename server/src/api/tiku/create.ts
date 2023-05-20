@@ -1,5 +1,7 @@
 import { Tables } from '#/mysql/tables';
 import { routePOST } from '#/routes/route';
+import { getResponseStruct } from '#/utils/response-struct';
+import querystring from 'querystring';
 
 export default routePOST<API__Tiku.CreateReq, API__Tiku.CreateRes>((context) => {
 
@@ -8,11 +10,16 @@ export default routePOST<API__Tiku.CreateReq, API__Tiku.CreateRes>((context) => 
 
   const data: typeof Tables.Tiku['StructIn'] = {
     ...question,
-    customQuestionInfo: JSON.stringify(context.request.body?.question.customQuestionInfo),
+    tName: querystring.escape(question.tName || ''),
+    customQuestionInfo: querystring.escape(JSON.stringify(context.request.body?.question.customQuestionInfo)),
     createBy: 1,
     createTime: +new Date(),
   };
 
+  // return getResponseStruct(333, 'sd', Tables
+  // .Tiku
+  // .insert([data])
+  // .sql());
   // return {
   //   succ: 1, res: Tables
   //   .Tiku

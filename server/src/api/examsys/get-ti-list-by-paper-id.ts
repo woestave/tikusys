@@ -1,6 +1,7 @@
 import { Tables } from '#/mysql/tables';
 import { routePOST } from '#/routes/route';
 import { responseStructPresets } from '#/utils/response-struct';
+import querystring from 'querystring';
 
 /**
  * 通过试卷id查询所有试卷所属的题列表
@@ -23,7 +24,11 @@ export default routePOST<API__Examsys__User.GetTiListByPaperIdReq, API__Examsys_
     .exec()
     .then((tiList) => {
       return {
-        tiList,
+        tiList: tiList.map((x) => ({
+          ...x,
+          tName: querystring.unescape(x.tName || ''),
+          customQuestionInfo: JSON.parse(querystring.unescape(x.customQuestionInfo as any as string)),
+        })),
       };
     });
 });

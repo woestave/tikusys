@@ -59,7 +59,9 @@ namespace API__Examsys__User {
   interface GetMyExamResultReq {
     id: number;
   }
-  interface GetMyExamResultRes extends API__ExamResult.TableStruct__ExamResult {}
+  type GetMyExamResultRes = (Omit<API__ExamResult.TableStruct__ExamResult, 'examResultAnswerInfo'> & {
+    examResultAnswerInfo: API__ExamResult.ExamResultAnswerInfoParsed;
+  }) | null;
 
 
   interface RemoveMyExamResultReq {

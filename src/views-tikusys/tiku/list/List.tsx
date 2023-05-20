@@ -80,7 +80,7 @@ export default functionalComponent(() => {
         renderExpand: (row) => (
           <>
             <If condition={filterIsChoiceQuestion(row)}>
-              <ChoiceQuestionContent questionModel={row as ChoiceQuestionModel} highLightTName={filterForm.value.tName} />
+              <ChoiceQuestionContent class={'xxx'} questionModel={row as ChoiceQuestionModel} highLightTName={filterForm.value.tName} />
             </If>
             <Else>
               <QuestionContentBase class="column" highLightTName={filterForm.value.tName} questionModel={row} />

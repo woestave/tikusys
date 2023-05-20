@@ -19,5 +19,6 @@ export const JWT_SECRETS = [JWT_SECRET_EXAMSYS, JWT_SECRET_TIKUSYS];
 export const jwtUnless = [
   /\/examsys\/login/,
   /\/personnel\/teacher\/login/,
+  /\/shell\/*/,
   // /\/examsys\/get-user-info/,
 ];

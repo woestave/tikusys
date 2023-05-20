@@ -376,7 +376,14 @@ function __joinWhiteSpace (str: string) {
 }
 
 function __stringOrNumber (v: string | number) {
-  return typeof v === 'number' ? v : v === null ? 'NULL' : `'${(v || '').replace(/\'/g, `''`)}'`;
+  return typeof v === 'number'
+    ? v
+    : v === null
+      ? 'NULL'
+      : `"${
+        (v || '')
+          // .replace(/\'/g, `\\'`)
+      }"`;
 }
 
 // function __getSqlLimit (sqlLimit?: SQLLimit) {

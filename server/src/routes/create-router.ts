@@ -46,9 +46,9 @@ export function createRouter (config = {
               }
             }))
             .then((res) => {
-              if (!res) {
-                return sendBody(getResponseStruct(ERR_CODES.canNotEmpty, ERR_MESSAGES.canNotEmpty, null));
-              }
+              // if (!res) {
+              //   return sendBody(getResponseStruct(ERR_CODES.canNotEmpty, ERR_MESSAGES.canNotEmpty, null));
+              // }
 
               sendBody(getResponseStruct(ERR_CODES.noError, 'success', res || null));
             })
