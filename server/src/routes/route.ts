@@ -8,7 +8,11 @@ export type RouteContext = Koa.ParameterizedContext<Koa.DefaultState, Koa.Defaul
 type OrPromise<T> = T | Promise<T>;
 
 function routeFactory (method: 'all' | 'get' | 'post') {
-  return function<RequestQuery, ResponseBody> (
+  return function<
+    RequestQuery,
+    ResponseBody,
+    R extends OrPromise<ResponseBody | ResponseStruct<unknown>> = OrPromise<ResponseBody | ResponseStruct<unknown>>
+  > (
     fn: (
       context: RouteContext & {
         query: RequestQuery;
@@ -17,7 +21,7 @@ function routeFactory (method: 'all' | 'get' | 'post') {
         };
       },
       next: () => Promise<any>
-    ) => OrPromise<ResponseBody | ResponseStruct<unknown>>,
+    ) => R,
   ) {
     const __ = (...args: Parameters<typeof fn>) => {
       return method === 'all'

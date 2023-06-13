@@ -17,7 +17,7 @@ import {
   NRow,
   InputProps,
   PopoverInst,
-  useNotification,
+  useMessage,
 } from 'naive-ui';
 import { computed, ref } from 'vue';
 import './Create.less';
@@ -35,6 +35,7 @@ import { SelectBaseOption } from 'naive-ui/es/select/src/interface';
 import { globalLoading } from '@/utils/create-loading';
 import { exampaperServices } from '@/apis/services/exampaper';
 import { tikuServices } from '@/apis/services/tiku';
+import { useRoute, useRouter } from 'vue-router';
 
 
 const CONFIGS = {
@@ -115,6 +116,35 @@ export default functionalComponent(() => {
     paperTotalScore: 100,
     paperQuestionInfo: getEmptyQuestionInfos(),
   });
+
+
+
+  const route = useRoute();
+  const router = useRouter();
+
+  const editingPaperId = route.params.paperId;
+  // const fromTid = route.query.fromTid;
+  const getEditingLoading = globalLoading.useCreateLoadingKey({ name: '获取试卷信息...', });
+  if (editingPaperId) {
+    getEditingLoading.show();
+    exampaperServices.getById({ id: +editingPaperId, }).then((res) => {
+      if (res.data.paperItem) {
+        model.value = {
+          ...res.data.paperItem,
+          paperQuestionInfo: getEmptyQuestionInfos(),
+        };
+        res.data.paperItem.paperMajor && getTiList(res.data.paperItem.paperMajor).then(() => {
+          model.value.paperQuestionInfo.singleChoiceQuestions = res.data.tiListOfThisPaper.filter(filterSingleChoiceQuestion).map(x => x.id);
+          model.value.paperQuestionInfo.multiChoiceQuestions = res.data.tiListOfThisPaper.filter(filterMultiChoiceQuestion).map(x => x.id);
+          model.value.paperQuestionInfo.shortAnswerQuestions = res.data.tiListOfThisPaper.filter(filterIsShortQuestion).map(x => x.id);
+        });
+      }
+    }).finally(getEditingLoading.hide);
+  }
+
+
+
+
 
   const getTiListByMajorLoading = globalLoading.useCreateLoadingKey({ name: () => `获取试题列表...`, });
   /**
@@ -234,7 +264,7 @@ export default functionalComponent(() => {
 
   const notEqTotalScorePopover = ref<PopoverInst>();
 
-  const notification = useNotification();
+  const message = useMessage();
 
   function onClear () {
     // model.value.id = 0;
@@ -259,7 +289,7 @@ export default functionalComponent(() => {
       .then(() => {
         createPaperLoading.show();
         exampaperServices
-          .create({
+          .createOrUpdate({
             ...omit(['paperQuestionInfo'], model.value),
             paperQuestionIds: [
               ...model.value.paperQuestionInfo.singleChoiceQuestions,
@@ -270,7 +300,8 @@ export default functionalComponent(() => {
           .then((res) => {
             console.log('牛逼', res);
             onClear();
-            notification.success({ title: '新建试卷成功', duration: 2400, });
+            message.success(editingPaperId ? '编辑试卷成功' : '新建试卷成功');
+            editingPaperId && router.back();
           }).finally(createPaperLoading.hide);
       });
   }

@@ -1,10 +1,14 @@
+/** 先解析路径 module-alias必须放到最上面 */
+import 'module-alias/register';
+import moduleAliasRegister from 'module-alias';
+moduleAliasRegister(__dirname + '/../package.json');
+
 import chalk from 'chalk';
 import Koa from 'koa';
 import bodyparser from 'koa-bodyparser';
 import logger from 'koa-logger';
 // import cors from 'koa-cors';
 import { createRouter } from './routes/create-router';
-import 'module-alias/register';
 import * as jwts from '#/utils/jwt';
 import koaJwt from 'koa-jwt';
 

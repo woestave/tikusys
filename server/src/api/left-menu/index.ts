@@ -27,12 +27,12 @@ export default routePOST<null, API__LeftMenu.Res>(() => {
             // icon: 'DocumentText',
             routeName: 'exampaper-create',
           },
-          {
-            id: 'examination-correcting',
-            label: '老师阅卷',
-            // icon: 'Pencil',
-            routeName: 'examination-correcting',
-          },
+          // {
+          //   id: 'examination-correcting',
+          //   label: '老师阅卷',
+          //   // icon: 'Pencil',
+          //   routeName: 'examination-correcting',
+          // },
           {
             id: 'examination-schedule',
             label: '考试规划',

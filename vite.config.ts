@@ -17,7 +17,6 @@ import path from 'path';
 //   },
 // });
 
-const DEF_PROXY_URL = 'http://localhost:4000';
 
 // for parse sfc custom blocks
 // https://github.com/vitejs/vite/tree/main/packages/plugin-vue#example-for-transforming-custom-blocks
@@ -35,6 +34,7 @@ const DEF_PROXY_URL = 'http://localhost:4000';
 export default defineConfig({
   // root: '/',
   // base: '/',
+  base: './',
   plugins: [
     vue(),
     /**
@@ -80,8 +80,9 @@ export default defineConfig({
     cors: true,
     host: true,
     proxy: {
-      '/api': {
-        target: DEF_PROXY_URL,
+      '^/api': {
+        target: 'http://localhost:4000',
+        // rewrite: x => x.replace(/^\/api\/tiku-server/, '/api'),
         changeOrigin: true,
       },
     },

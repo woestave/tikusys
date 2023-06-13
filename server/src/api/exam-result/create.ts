@@ -9,6 +9,7 @@ export default routePOST<API__ExamResult.CreateReq, API__ExamResult.CreateRes>((
   const body = context.request.body;
   const answerInfo = body.answerInfo;
   const examinationId = body.id;
+  const choiceQuestionScore = body.choiceQuestionScore;
 
   const userInfo = context.state.user as API__Examsys__User.GetUserInfoRes['userInfo'];
 
@@ -41,6 +42,8 @@ export default routePOST<API__ExamResult.CreateReq, API__ExamResult.CreateRes>((
         examResultCreateTime: +new Date(),
         examResultExaminationId: examinationId,
         examResultStudentId: userInfo.studentId,
+        examResultSQ_Marking: '',
+        examResultChoiceQuestionScore: choiceQuestionScore,
       },
     ])
     .exec()

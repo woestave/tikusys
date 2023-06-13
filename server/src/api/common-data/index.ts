@@ -9,8 +9,9 @@ export default routePOST<null, API__CommonData.Res>((context, next) => {
   return Promise.all([
     Tables.ClassType.select().exec(),
     Tables.Class.select().exec(),
+    Tables.Major.select().exec(),
   ])
-    .then(([classTypes, classes]) => ({
+    .then(([classTypes, classes, majors]) => ({
       phases: [
         createValueLabelObj(1, '阶段1'),
         createValueLabelObj(2, '阶段2'),
@@ -21,11 +22,7 @@ export default routePOST<null, API__CommonData.Res>((context, next) => {
       ],
       classes: classes.map(getValueLabelCurried('id', 'className')),
       classTypes: classTypes.map(getValueLabelCurried('id', 'classTypeName')),
-      majors: [
-        createValueLabelObj(1, '前端'),
-        createValueLabelObj(2, 'JAVA'),
-        createValueLabelObj(3, '基础课'),
-      ],
+      majors: majors.map(getValueLabelCurried('majorId', 'majorName')),
       studentStatus: [
         createValueLabelObj(0, '正常'),
         createValueLabelObj(1, '就业'),

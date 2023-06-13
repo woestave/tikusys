@@ -109,6 +109,7 @@ export function requestOptionsFactory (option: KyOptions & { method: NonNullable
         }
         return res;
       }).catch((err) => {
+        console.warn(err);
         if (err?.errNo) {
           if (err?.errNo !== 401) {
             discreteMessage.error(err.errMsg || '服务器错误');

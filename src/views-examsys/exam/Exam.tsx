@@ -7,11 +7,14 @@ import { DataTableColumns, NButton, NDataTable, NH1 } from 'naive-ui';
 import { prop } from 'ramda';
 import { useRouter, } from 'vue-router';
 
+function getEndTime (targetTime: number, duration: number) {
+  return (targetTime + (duration * 60 * 1000));
+}
 /**
  * 判断当前时间是否在给定时间戳+给定持续时间之内
  */
 function inTime (targetTime: number, duration: number) {
-  return +new Date() > targetTime && +new Date() <= (targetTime + (duration * 60 * 1000));
+  return +new Date() > targetTime && +new Date() <= getEndTime(targetTime, duration);
 }
 
 export default functionalComponent(() => {
@@ -116,17 +119,21 @@ export default functionalComponent(() => {
               const examing = inTime(row.examDate, row.examDuration);
               return (
                 <>
-                  <NButton
+                  {examing && <NButton
                     type={examing ? 'primary' : 'default'}
-                    disabled={!examing}
                     onClick={() => onExaming(row)}
-                  >开始考试</NButton>
-                  {/* <NButton onClick={() => onExaming(row)}>开始</NButton> */}
+                  >开始考试</NButton>}
+                  {(getEndTime(row.examDate, row.examDuration) < +new Date()) && row.isAnswered && (
+                    <NButton
+                      type="info"
+                      onClick={() => onExaming(row)}
+                    >查看成绩</NButton>
+                  )}
                 </>
               );
             },
           },
-        ] as DataTableColumns<API__Examination.TableStruct__Examination>}
+        ] as DataTableColumns<API__Examsys__User.GetMyExamRes['list'][0]>}
         loading={getExaminationListStatus.value === 'pending'}
       >
       </NDataTable>

@@ -15,9 +15,9 @@
 
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { useOsTheme, darkTheme, NNotificationProvider, NConfigProvider, zhCN, dateZhCN, } from 'naive-ui'
+import { darkTheme, NNotificationProvider, NConfigProvider, zhCN, dateZhCN, } from 'naive-ui'
 
-const osTheme = useOsTheme()
+// const osTheme = useOsTheme()
 
 // const theme = computed(() => (osTheme.value === 'dark' ? darkTheme : null))
 const theme = computed(() => darkTheme);

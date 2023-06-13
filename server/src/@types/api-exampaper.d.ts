@@ -43,17 +43,45 @@ namespace API__Exampaper {
     // paperQuestionIds: number[];
   }
 
-
-  interface CreateReq extends TableStruct__Exampaper {
+  interface CreateOrUpdateReq extends TableStruct__Exampaper {
     paperQuestionIds: number[];
   }
+  interface CreateOrUpdateRes {
+    succ: 1 | 0;
+    type: 'create' | 'update';
+  }
+
+
+  interface CreateReq extends CreateOrUpdateReq {}
   interface CreateRes {
     succ: 1;
+  }
+
+  interface UpdateReq extends CreateOrUpdateReq {}
+  interface UpdateRes {
+    succ: 1 | 0;
+  }
+
+
+  interface RemoveReq {
+    id: number;
+  }
+  interface RemoveRes {
+    succ: number;
   }
 
 
   interface ListReq {}
   interface ListRes {
     list: TableStruct__Exampaper[];
+  }
+
+
+  interface GetByIdReq {
+    id: number;
+  }
+  interface GetByIdRes {
+    paperItem: TableStruct__Exampaper | null;
+    tiListOfThisPaper: API__Tiku.TableStruct__Tiku[];
   }
 }

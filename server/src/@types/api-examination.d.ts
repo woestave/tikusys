@@ -22,13 +22,34 @@ namespace API__Examination {
     examApprovedBy?: API__Teacher.TableStruct__Teacher['teacherId'];
   }
 
+  interface CreateOrUpdateReq extends Omit<TableStruct__Examination, 'createTime' | 'createBy'> {}
+  interface CreateOrUpdateRes {
+    succ: 1 | 0;
+    type: 'create' | 'update';
+  }
 
-  interface CreateReq extends Omit<TableStruct__Examination, 'createTime' | 'createBy'> {}
+  interface CreateReq extends CreateOrUpdateReq {}
   interface CreateRes {}
 
+  interface UpdateReq extends CreateOrUpdateReq {}
+  interface UpdateRes {
+    succ: 1 | 0;
+  }
 
-  interface ListReq {}
+
+  interface RemoveReq {
+    id: number;
+  }
+  interface RemoveRes {
+    succ: number;
+  }
+
+
+  interface ListReq extends API__BaseTypes.Pagination {
+    //
+  }
   interface ListRes {
     list: TableStruct__Examination[];
+    total: number;
   }
 }

@@ -26,12 +26,12 @@ export default functionalComponent(() => {
         icon: 'Newspaper',
         routeName: 'exam',
       },
-      {
-        id: '2',
-        label: '成绩查询',
-        icon: 'PodiumSharp',
-        routeName: 'query-results',
-      },
+      // {
+      //   id: '2',
+      //   label: '成绩查询',
+      //   icon: 'PodiumSharp',
+      //   routeName: 'query-results',
+      // },
       {
         id: '3',
         label: '修改密码',

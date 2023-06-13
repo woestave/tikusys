@@ -22,7 +22,7 @@ const mainRoutes: RouteRecordRaw[] = [
   },
   {
     name: 'tiku-create',
-    path: '/tiku/create',
+    path: '/tiku/create/:tId?',
     component: () => import('@/views-tikusys/tiku/create/Create'),
     meta: {
       title: '题库 - 添加',
@@ -31,7 +31,7 @@ const mainRoutes: RouteRecordRaw[] = [
   },
   {
     name: 'exampaper-create',
-    path: '/exampaper/create',
+    path: '/exampaper/create/:paperId?',
     component: () => import('@/views-tikusys/exampaper/create/Create'),
     meta: {
       title: '试卷 - 生成',
@@ -98,6 +98,15 @@ const mainRoutes: RouteRecordRaw[] = [
     component: () => import('@/views-tikusys/personnel/teacher/Teacher'),
     meta: {
       title: '教师 - 面板',
+      requiresAuth: true,
+    },
+  },
+  {
+    name: 'update-password',
+    path: '/update-password',
+    component: () => import('@/views-tikusys/personnel/teacher/UpdatePassword'),
+    meta: {
+      title: '修改密码 - 题库系统',
       requiresAuth: true,
     },
   },

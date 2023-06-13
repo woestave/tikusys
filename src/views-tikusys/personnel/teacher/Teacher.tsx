@@ -7,10 +7,13 @@ import { functionalComponent, useCallbackP } from '@/utils/functional-component'
 import { TeacherRole } from 'common-packages/constants/teacher-role';
 import { sleepCurrying } from 'common-packages/utils/sleep';
 import { createValueLabelObj } from 'common-packages/utils/value-label-utils';
-import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NInput, NSelect, useNotification } from 'naive-ui';
+import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NFormItemGi, NGrid, NIcon, NInput, NP, NPopconfirm, NSelect, PaginationInfo, useMessage, } from 'naive-ui';
 import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
-import { computed, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import md5 from 'blueimp-md5';
+import { RenderPrefix } from 'naive-ui/es/pagination/src/interface';
+import { Edit } from '@vicons/tabler';
+import { Trash } from '@vicons/ionicons5';
 window.md5 = md5;
 function getDefaultTeacherForm (): API__Teacher.CreateReq {
   return {
@@ -42,13 +45,13 @@ export default functionalComponent(() => {
       message: '请输入教师名称',
     },
     teacherClass: {
-      required: true,
+      required: false,
       type: 'number',
       trigger: ['input', 'blur'],
       validator (rule, value) {
-        if (!value && teacherForm.value.teacherRole === TeacherRole.teacher) {
-          return false;
-        }
+        // if (!value && teacherForm.value.teacherRole === TeacherRole.teacher) {
+        //   return false;
+        // }
         return true;
       },
       message: '请选择教师所属班级',
@@ -72,6 +75,8 @@ export default functionalComponent(() => {
     },
   }
 
+  const message = useMessage();
+
   const commonDataPinia = useCommonDataPinia();
 
   const teacherRoles = computed(() => {
@@ -80,12 +85,38 @@ export default functionalComponent(() => {
     });
   });
 
-  const [ teacherList, getTeacherList, getTeacherListStatus ] = useCallbackP(() => personnelServices.teacherList().then(x => x.data.list || []));
+  const filterForm = ref({
+    teacherName: '',
+    teacherClass: null,
+    teacherStatus: null,
+    teacherRole: null,
+  });
+
+  const pagination = reactive<Partial<PaginationInfo & {
+    prefix: RenderPrefix;
+  }>>({
+    pageSize: 10,
+    page: 1,
+    itemCount: 0,
+    prefix: ({ itemCount }) => `${itemCount}条记录`,
+  });
+
+  const [ teacherList, getTeacherList, getTeacherListStatus ] = useCallbackP(() => personnelServices.teacherList({
+    pageNumber: pagination.page,
+    pageSize: pagination.pageSize,
+    ...filterForm.value,
+  }).then(x => {
+    pagination.itemCount = x.data.total;
+    return x.data;
+  }));
   getTeacherList();
 
-  const teacherForm = ref<API__Teacher.CreateReq>(getDefaultTeacherForm());
+  function onUpdatePageNumber (newPageNumber: number) {
+    pagination.page = newPageNumber;
+    getTeacherList();
+  }
 
-  const notification = useNotification();
+  const teacherForm = ref<API__Teacher.CreateReq>(getDefaultTeacherForm());
 
   const teacherCreateLoading = globalLoading.useCreateLoadingKey({ name: '创建教师信息...' });
   const teacherChangeClassLoading = globalLoading.useCreateLoadingKey({ name: '修改教师班级...' });
@@ -94,11 +125,13 @@ export default functionalComponent(() => {
   function onClear () {
     teacherForm.value = getDefaultTeacherForm();
   }
-  function onSubmit () {
+  function onSubmitOrEdit () {
     formRef.value?.validate().then(() => {
       teacherCreateLoading.show();
-      personnelServices.teacherCreate({...teacherForm.value}).then((res) => {
-        notification.success({ title: '新建成功', duration: 0, });
+      personnelServices.teacherCreateOrUpdate({...teacherForm.value}).then((res) => {
+        message.success(isEditing.value ? '修改成功' : '新建成功');
+        isEditing.value = false;
+        onClear();
       }).then(sleepCurrying(350)).then(getTeacherList).finally(teacherCreateLoading.hide);
     });
   }
@@ -124,6 +157,31 @@ export default functionalComponent(() => {
       teacherForm.value.teacherClass = null;
     }
   }
+
+
+  const isEditing = ref(false);
+  function onEdit (row: API__Teacher.TableStruct__Teacher) {
+    isEditing.value = true;
+    teacherForm.value = {...row};
+    document.querySelector('.personnel-teacher')?.scrollIntoView({ behavior: 'smooth', });
+  }
+  function onEditCancel () {
+    isEditing.value = false;
+    teacherForm.value = getDefaultTeacherForm();
+  }
+
+  const removeTeacherLoading = globalLoading.useCreateLoadingKey({ name: '删除角色信息...' });
+  function onRemove (row: API__Teacher.TableStruct__Teacher) {
+    removeTeacherLoading.show();
+    personnelServices.teacherRemove({ id: row.teacherId }).then((res) => {
+      res.data.succ === 1 && message.success('删除角色信息成功');
+      onClear();
+      isEditing.value = false;
+      getTeacherList();
+    }).finally(removeTeacherLoading.hide);
+  }
+
+
 
 
   return () => (
@@ -180,13 +238,73 @@ export default functionalComponent(() => {
           ></NSelect>
         </NFormItem>
         <div class="form-actions">
-          <NButton class="clear-btn" ghost round type="error" onClick={onClear}>清空</NButton>
-          <NButton round type="primary" onClick={onSubmit}>提交</NButton>
+          {
+            isEditing.value
+              ? (
+                <>
+                  <NButton class="clear-btn" ghost round type="error" onClick={onEditCancel}>取消编辑</NButton>
+                  <NButton type="primary" round onClick={onSubmitOrEdit}>确认修改</NButton>
+                </>
+              )
+              : (
+                <>
+                  <NButton class="clear-btn" ghost round type="error" onClick={onClear}>清空</NButton>
+                  <NButton type="primary" round onClick={onSubmitOrEdit}>新建</NButton>
+                </>
+              )
+          }
         </div>
       </NForm>
       <NDivider />
+      <NForm labelAlign="left">
+        <NGrid xGap={12}>
+          <NFormItemGi span={6} label="学生名称|证件号">
+            <NInput
+              type="text"
+              maxlength={20}
+              showCount
+              v-model:value={filterForm.value.teacherName}
+              clearable
+              onClear={() => setTimeout(getTeacherList)}
+            />
+          </NFormItemGi>
+          <NFormItemGi span={6} label="所属班级">
+            <NSelect
+              v-model:value={filterForm.value.teacherClass}
+              options={commonDataPinia.classes as SelectMixedOption[]}
+              placeholder="所属班级"
+              filterable
+              clearable
+              onClear={() => setTimeout(getTeacherList)}
+            />
+          </NFormItemGi>
+          {/* <NFormItemGi span={3} label="状态">
+            <NSelect
+              v-model:value={filterForm.value.teacherStatus}
+              options={commonDataPinia.studentStatus as SelectMixedOption[]}
+              clearable
+              onClear={() => setTimeout(getTeacherList)}
+              placeholder="学生状态"
+            />
+          </NFormItemGi> */}
+          <NFormItemGi span={3} label="职能">
+            <NSelect
+              v-model:value={filterForm.value.teacherRole}
+              options={teacherRoles.value as SelectMixedOption[]}
+              clearable
+              onClear={() => setTimeout(getTeacherList)}
+            />
+          </NFormItemGi>
+          <NFormItemGi span={3}>
+            <NButton type="primary" onClick={getTeacherList}>查询</NButton>
+          </NFormItemGi>
+        </NGrid>
+      </NForm>
       <NDataTable
-        data={teacherList.value || []}
+        data={teacherList.value?.list || []}
+        remote
+        pagination={pagination}
+        onUpdatePage={onUpdatePageNumber}
         columns={[
           {
             title: '教师编号',
@@ -245,8 +363,41 @@ export default functionalComponent(() => {
           {
             title: '操作',
             key: '',
-            render () {
-              return null;
+            render (row) {
+              return (
+                <>
+                  <NButton size="small" text onClick={() => onEdit(row)}>
+                    <NIcon size={22}>
+                      <Edit />
+                    </NIcon>
+                  </NButton>
+                  <NPopconfirm
+                    class="global--n-popconfirm"
+                    negativeText="取消"
+                    positiveText="确认"
+                    onPositiveClick={() => onRemove(row)}
+                    // onNegativeClick="handleNegativeClick"
+                  >
+                    {{
+                      trigger: () => (
+                        <NButton size="small" text style="margin-left: 16px;">
+                          <NIcon size={22}>
+                            <Trash />
+                          </NIcon>
+                        </NButton>
+                      ),
+                      default: () => (
+                        <div>
+                          <NP>
+                            <p>删除后无法恢复。</p>
+                            <p style="font-size: 12px; color: gray;"></p>
+                          </NP>
+                        </div>
+                      ),
+                    }}
+                  </NPopconfirm>
+                </>
+              );
             },
           },
         ] as DataTableColumns<API__Teacher.TableStruct__Teacher>}

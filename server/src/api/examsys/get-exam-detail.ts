@@ -15,8 +15,11 @@ export default routePOST<API__Examsys__User.GetExamDetailReq, API__Examsys__User
   return F
     .exec()
     .then(([detail]) => {
+      if (!detail) {
+        return null;
+      }
       return {
-        ...detail || {},
+        ...detail,
       };
     });
 });

@@ -7,7 +7,7 @@ export const useCommonDataPinia = defineStore('commonData', () => {
   const commonData = useRequest(getCommonData());
   // console.log('useCommonDataPinia', commonData);
   function getListCurried<K extends keyof API__CommonData.Res> (key: K) {
-    return computed(() => commonData[0].value?.[key] || []);
+    return computed(() => commonData[0].value?.[key]! || []);
   }
   const classes = getListCurried('classes');
   const phases = getListCurried('phases');

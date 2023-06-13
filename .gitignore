@@ -1,6 +1,7 @@
 node_modules
 .DS_Store
 dist
+online
 dist-ssr
 server/node_modules
 

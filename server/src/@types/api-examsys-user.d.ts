@@ -27,9 +27,26 @@ namespace API__Examsys__User {
     succ: 1;
   }
 
+
+
+
+
+  interface UpdatePasswordReq {
+    oldPwd: string;
+    newPwd: string;
+  }
+  interface UpdatePasswordRes {
+    succ: 1;
+  }
+
+
+
   /** 获取`我的考试信息` */
   interface GetMyExamRes {
-    list: API__Examination.TableStruct__Examination[];
+    list: Array<API__Examination.TableStruct__Examination & {
+      /** 这次考试学生是否参与 */
+      isAnswered: boolean;
+    }>;
   }
 
 

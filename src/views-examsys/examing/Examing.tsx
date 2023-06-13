@@ -3,20 +3,19 @@ import './Examing.less';
 import { useRoute } from 'vue-router';
 import { useRequest } from '@/hooks/use-request';
 import examsysServices from '@/apis/services/examsys';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { filterIsShortQuestion, ShortQuestionModel } from 'common-packages/models/question-model-short';
+import { computed, onMounted, ref } from 'vue';
+import { filterIsShortQuestion } from 'common-packages/models/question-model-short';
 import { filterMultiChoiceQuestion, filterSingleChoiceQuestion } from 'common-packages/models/question-model-choice';
-import { ChoiceQuestionModel } from 'common-packages/models/question-model-choice';
-import { NButton, NCard, NCheckbox, NCheckboxGroup, NH1, NH2, NH3, NInput, NLi, NModal, NOl, NP, NRadioButton, NRadioGroup, NRow, NSpace, NText, NUl, useDialog, useMessage, useNotification } from 'naive-ui';
-import { formatMsToHMS } from '@/utils/HMS';
-import { T, prop, sum } from 'ramda';
+import { NButton, NCard, NCheckbox, NCheckboxGroup, NH1, NH3, NInput, NLi, NModal, NOl, NP, NPopconfirm, NRadioButton, NRadioGroup, NRow, NSpace, NText, NUl, useDialog, useMessage, useNotification } from 'naive-ui';
+import { T, sum } from 'ramda';
 import { examResultServices } from '@/apis/services/exam-result';
 import { globalLoading } from '@/utils/create-loading';
 import { useCommonDataPinia } from '@/store/common-data.pinia';
 import LeftTime from './components/LeftTime';
 import { sleep } from 'common-packages/utils/sleep';
+import getClassifyQuestions from 'common-packages/helpers/get-classify-questions';
+import computeQuestionScores, { multiQuestionIsRight, singleQuestionIsRight } from 'common-packages/helpers/compute-question-scores';
 
-const propScoreValue = prop('scoreValue');
 
 export default functionalComponent(() => {
 
@@ -45,35 +44,32 @@ export default functionalComponent(() => {
       .finally(loadingDetail.hide)
   );
 
-  const [ examTiList, examTiListPromise, examTiListPromiseStatus, ] = useRequest(examDetailPromise.then((res) => {
+  const [ examTiList, ] = useRequest(examDetailPromise.then((res) => {
     return examsysServices.getTiListByPaperId({ id: res.examExampaperId });
   }).finally(loadingTiList.hide));
 
-  const [ examResult, examResultPromise, examResultPromiseStatus, ] = useRequest(examDetailPromise.then((res) => {
+  const [ , examResultPromise, , ] = useRequest(examDetailPromise.then((res) => {
     return examsysServices.getMyExamResult({ id: res.id, });
   }));
   const [ userInfo ] = useRequest(examsysServices.getUserInfo());
+
+  const answerParsedSQ_Marking = ref<API__ExamResult.examResultSQ_MarkingParsed | null>(null);
 
   examResultPromise.then((examResult) => {
     console.log(examResult);
     // if (examResult && typeof examResult.examResultAnswerInfo === 'object') {
     if (examResult) {
       answer.value = examResult.examResultAnswerInfo;
+      try {
+        answerParsedSQ_Marking.value = JSON.parse(decodeURIComponent(examResult.examResultSQ_Marking));
+      } catch (e) {}
       submitted.value = true;
       examResultModal.value = true;
     }
   });
 
   const questions = computed(() => {
-    const shorts = (examTiList.value?.tiList.filter(filterIsShortQuestion) || []) as Array<ShortQuestionModel & API__Tiku.TableStruct__Tiku>;
-    const singles = (examTiList.value?.tiList.filter(filterSingleChoiceQuestion) || []) as Array<ChoiceQuestionModel & API__Tiku.TableStruct__Tiku>;
-    const multiples = (examTiList.value?.tiList.filter(filterMultiChoiceQuestion) || []) as Array<ChoiceQuestionModel & API__Tiku.TableStruct__Tiku>;
-
-    return {
-      singles,
-      multiples,
-      shorts,
-    };
+    return getClassifyQuestions(examTiList.value?.tiList || []);
   });
 
 
@@ -94,22 +90,22 @@ export default functionalComponent(() => {
     }
   };
 
-  /**
-   * 判断单选题是否答对
-   */
-  function singleQuestionIsRight (x: ChoiceQuestionModel) {
-    return x.customQuestionInfo.choices[answer.value[x.id] as number]?.right;
-  }
-  /**
-   * 判断多选题是否答对
-   */
-  function multiQuestionIsRight (x: ChoiceQuestionModel) {
-    const myChoices = answer.value[x.id] as number[];
-    if (!myChoices || myChoices.length === 0) {
-      return false;
-    }
-    return x.customQuestionInfo.choices.every((y, yi) => y.right ? myChoices.indexOf(yi) >= 0 : myChoices.indexOf(yi) === -1);
-  }
+  // /**
+  //  * 判断单选题是否答对
+  //  */
+  // function singleQuestionIsRight (x: ChoiceQuestionModel) {
+  //   return x.customQuestionInfo.choices[answer.value[x.id] as number]?.right;
+  // }
+  // /**
+  //  * 判断多选题是否答对
+  //  */
+  // function multiQuestionIsRight (x: ChoiceQuestionModel) {
+  //   const myChoices = answer.value[x.id] as number[];
+  //   if (!myChoices || myChoices.length === 0) {
+  //     return false;
+  //   }
+  //   return x.customQuestionInfo.choices.every((y, yi) => y.right ? myChoices.indexOf(yi) >= 0 : myChoices.indexOf(yi) === -1);
+  // }
 
   const submitted = ref(false);
   const examResultModal = ref(false);
@@ -117,34 +113,35 @@ export default functionalComponent(() => {
   const isNotStart = computed(() => +new Date() < examDetail.value?.examDate!);
 
   const answerResult = computed(() => {
-    const singles = questions.value.singles.filter(singleQuestionIsRight);
-    const multiples = questions.value.multiples.filter(multiQuestionIsRight);
-    const shorts = questions.value.shorts;
+    // const singles = questions.value.singles.filter(x => singleQuestionIsRight(x, answer.value));
+    // const multiples = questions.value.multiples.filter(x => multiQuestionIsRight(x, answer.value));
+    // const shorts = questions.value.shorts;
 
-    /** 做对的单选题总分 */
-    const rightSingleScore = sum(singles.map(propScoreValue));
-    /** 做对的多选题总分 */
-    const rightMultiScore = sum(multiples.map(propScoreValue));
-    /** 简答题总分 */
-    const shortScore = sum(shorts.map(propScoreValue));
-    /** 总分 */
-    const totalScore = sum(examTiList.value?.tiList.map((x) => x.scoreValue) || []);
-    /** 选择题总分 */
-    const choiceTotalScore = totalScore - shortScore;
-    /** 做对的选择题总分 */
-    const rightChoicesTotalScore = rightSingleScore + rightMultiScore;
+    // /** 做对的单选题总分 */
+    // const rightSingleScore = sum(singles.map(propScoreValue));
+    // /** 做对的多选题总分 */
+    // const rightMultiScore = sum(multiples.map(propScoreValue));
+    // /** 简答题总分 */
+    // const shortScore = sum(shorts.map(propScoreValue));
+    // /** 总分 */
+    // const totalScore = sum(examTiList.value?.tiList.map((x) => x.scoreValue) || []);
+    // /** 选择题总分 */
+    // const choiceTotalScore = totalScore - shortScore;
+    // /** 做对的选择题总分 */
+    // const rightChoicesTotalScore = rightSingleScore + rightMultiScore;
 
-    const res = {
-      singles, multiples, shorts,
-      rightSingleScore,
-      rightMultiScore,
-      shortScore,
-      totalScore,
-      choiceTotalScore,
-      rightChoicesTotalScore,
-    };
+    // const res = {
+    //   singles, multiples, shorts,
+    //   rightSingleScore,
+    //   rightMultiScore,
+    //   shortScore,
+    //   totalScore,
+    //   choiceTotalScore,
+    //   rightChoicesTotalScore,
+    // };
 
-    return res;
+    // return res;
+    return computeQuestionScores(questions.value, answer.value);
   });
 
 
@@ -163,12 +160,12 @@ export default functionalComponent(() => {
     }) || [];
   });
 
-  function getQuestionResultPrefix<Q extends API__Tiku.TableStruct__Tiku> (q: Q, isRight: (q: Q) => boolean) {
+  function getQuestionResultPrefix<Q extends API__Tiku.TableStruct__Tiku> (q: Q, isRight: (q: Q, a: API__ExamResult.ExamResultAnswerInfoParsed) => boolean) {
     if (!submitted.value) {
       return null;
     }
     return q.id in answer.value ? (
-      isRight(q) ? null : (<span style="color: red;">×</span>)
+      isRight(q, answer.value) ? null : (<span style="color: red;">×</span>)
     ) : (<span style="color: yellow;">(未作答)</span>);
   }
 
@@ -176,7 +173,11 @@ export default functionalComponent(() => {
     console.log(answer.value);
     function confirm () {
       examResultServices
-        .create({ id: examDetail.value?.id!, answerInfo: answer.value, })
+        .create({
+          id: examDetail.value?.id!,
+          answerInfo: answer.value,
+          choiceQuestionScore: answerResult.value.rightChoicesTotalScore,
+        })
         .then((res) => {
           localStorage.removeItem(LOCAL_ANSWER_KEY);
           notification.success({ title: '提交成功', duration: 2400, });
@@ -406,10 +407,26 @@ export default functionalComponent(() => {
               default: () => (
                 <div>
                   <NP>选择题： {answerResult.value.rightChoicesTotalScore}分 满分{answerResult.value.choiceTotalScore}分</NP>
-                  <NP>主观题： ?/{answerResult.value.shortScore}分 请等待老师阅卷</NP>
+                  {answerParsedSQ_Marking.value ? (
+                    <NP>主观题： {sum(
+                      Object
+                        .keys(answerParsedSQ_Marking.value)
+                        .map(key => answerParsedSQ_Marking.value?.[key as any])
+                        .filter(x => typeof x === 'number') as number[]
+                    )}分</NP>
+                  ) : (
+                    <NP>主观题： ?/{answerResult.value.shortScore}分 请等待老师阅卷</NP>
+                  )}
                   <NP>
                     <NText>本次考试可重复答卷，</NText>
-                    <NButton text type="primary" onClick={onClickRepeatExam}>清除考试记录并重新答题</NButton>
+                    <NPopconfirm
+                      onPositiveClick={onClickRepeatExam}
+                    >
+                      {{
+                        trigger: () => <NButton text type="primary">清除考试记录并重新答题</NButton>,
+                        default: () => '确认重新答卷吗？',
+                      }}
+                    </NPopconfirm>
                   </NP>
                 </div>
               ),

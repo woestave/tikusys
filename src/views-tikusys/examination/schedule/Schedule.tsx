@@ -1,11 +1,15 @@
 import { examinationServices } from '@/apis/services/examination';
 import { exampaperServices } from '@/apis/services/exampaper';
+import { personnelServices } from '@/apis/services/personnel';
 import { PageSubTitle } from '@/components/PageSubTitle';
 import { PageTitle } from '@/components/PageTitle';
 import { useRequest } from '@/hooks/use-request';
 import { useCommonDataPinia } from '@/store/common-data.pinia';
 import { globalLoading } from '@/utils/create-loading';
 import { functionalComponent, useCallbackP } from '@/utils/functional-component';
+import { Trash } from '@vicons/ionicons5';
+import { Edit } from '@vicons/tabler';
+import { TeacherRole } from 'common-packages/constants/teacher-role';
 import { sleepCurrying } from 'common-packages/utils/sleep';
 import {
   DataTableColumns,
@@ -21,13 +25,20 @@ import {
   NFormItem,
   NFormItemGi,
   NGrid,
+  NIcon,
   NInput,
   NInputNumber,
+  NP,
+  NPopconfirm,
   NSelect,
-  useNotification,
+  NTooltip,
+  PaginationInfo,
+  useMessage,
 } from 'naive-ui';
+import { RenderPrefix } from 'naive-ui/es/pagination/src/interface';
 import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const localPrevDateKey = 'rsd_exam_create_prev_date';
 const localExamDurationKey = 'rsd_exam_create_exam_duration';
@@ -38,17 +49,41 @@ interface CreateForm extends Omit<API__Examination.CreateReq, 'examExampaperId' 
 }
 
 export default functionalComponent(() => {
+  const router = useRouter();
+
   const formRef = ref<FormInst>();
 
   const commonDataPinia = useCommonDataPinia();
 
-  const [ examinationList, getExaminationList, getExaminationListStatus ] = useCallbackP(() => examinationServices.list({}).then((res) => res.data.list || []));
+  const pagination = reactive<Partial<PaginationInfo & {
+    prefix: RenderPrefix;
+  }>>({
+    page: 1,
+    pageSize: 10,
+    itemCount: 0,
+    prefix: ({ itemCount }) => `${itemCount}条记录`,
+  });
+
+  const [ examinationList, getExaminationList, getExaminationListStatus ] = useCallbackP(() => examinationServices.list({
+    pageNumber: pagination.page,
+    pageSize: pagination.pageSize,
+  }).then((res) => {
+    pagination.itemCount = res.data.total;
+    return res.data || [];
+  }));
   getExaminationList();
+
+  function onUpdatePageNumber (newPageNumber: number) {
+    pagination.page = newPageNumber;
+    getExaminationList();
+  }
+
+  const [userInfo] = useRequest(personnelServices.getUserInfo());
 
   const [ exampaperList ] = useRequest(exampaperServices.list({}));
 
   const loading = globalLoading.useCreateLoadingKey({ name: '新建考试计划...', });
-  const notification = useNotification();
+  const message = useMessage();
 
   function genDefaultForm (): CreateForm {
     return {
@@ -67,17 +102,19 @@ export default functionalComponent(() => {
   function onClear () {
     scheduleForm.value = genDefaultForm();
   }
-  function onSubmit () {
+  function onSubmitOrEdit () {
     formRef.value?.validate().then(() => {
       loading.show();
-      examinationServices.create({
+      examinationServices.createOrUpdate({
         ...scheduleForm.value,
         examDate: scheduleForm.value.examDate!,
         examExampaperId: scheduleForm.value.examExampaperId!,
       }).then(sleepCurrying(300)).then((res) => {
         //
         getExaminationList();
-        notification.success({ title: '新建考试计划成功', duration: 2400, });
+        message.success(isEditing.value ? '修改成功' : '新建成功');
+        isEditing.value = false;
+        onClear();
       }).finally(loading.hide);
       console.log(scheduleForm.value);
     });
@@ -135,6 +172,40 @@ export default functionalComponent(() => {
   function onUpdateDate (value: number) {
     value && localStorage.setItem(localPrevDateKey, value + '');
   }
+  // 批改试卷
+  function onCorrecting (row: API__Examination.TableStruct__Examination) {
+    //
+    router.push({ name: 'examination-correcting', query: { examinationId: row.id, }, });
+  }
+
+
+
+
+  const isEditing = ref(false);
+  function onEdit (row: API__Examination.TableStruct__Examination) {
+    isEditing.value = true;
+    scheduleForm.value = {...row};
+    document.querySelector('.examination-schedule')?.scrollIntoView({ behavior: 'smooth', });
+  }
+  function onEditCancel () {
+    isEditing.value = false;
+    scheduleForm.value = genDefaultForm();
+  }
+
+  const removeExaminationLoading = globalLoading.useCreateLoadingKey({ name: '删除考试信息...' });
+  function onRemove (row: API__Examination.TableStruct__Examination) {
+    removeExaminationLoading.show();
+    examinationServices.remove({ id: row.id }).then((res) => {
+      res.data.succ === 1 && message.success('删除考试信息成功');
+      onClear();
+      isEditing.value = false;
+      getExaminationList();
+    }).finally(removeExaminationLoading.hide);
+  }
+
+
+
+
 
   return () => (
     <div class="examination-schedule">
@@ -225,13 +296,31 @@ export default functionalComponent(() => {
           }} />
         </NFormItem>
         <div class="form-actions">
-          <NButton class="clear-btn" ghost round type="error" onClick={onClear}>清空</NButton>
-          <NButton round type="primary" onClick={onSubmit}>提交</NButton>
+          {/* <NButton class="clear-btn" ghost round type="error" onClick={onClear}>清空</NButton>
+          <NButton round type="primary" onClick={onSubmit}>提交</NButton> */}
+          {
+            isEditing.value
+              ? (
+                <>
+                  <NButton class="clear-btn" ghost round type="error" onClick={onEditCancel}>取消编辑</NButton>
+                  <NButton type="primary" round onClick={onSubmitOrEdit}>确认修改</NButton>
+                </>
+              )
+              : (
+                <>
+                  <NButton class="clear-btn" ghost round type="error" onClick={onClear}>清空</NButton>
+                  <NButton type="primary" round onClick={onSubmitOrEdit}>新建</NButton>
+                </>
+              )
+          }
         </div>
       </NForm>
       <NDivider />
       <NDataTable
-        data={examinationList.value || []}
+        data={examinationList.value?.list || []}
+        remote
+        pagination={pagination}
+        onUpdatePage={onUpdatePageNumber}
         columns={[
           {
             title: '编号',
@@ -284,6 +373,91 @@ export default functionalComponent(() => {
             key: 'examDesc',
             ellipsis: {
               tooltip: true,
+            },
+          },
+          {
+            title: '教师操作',
+            key: 'teacher-actions',
+            render (row) {
+              /** 两天内允许改卷 */
+              const flag = row.examDate > (+new Date() - (60 * 60 * 24 * 1000) * 2);
+              // 只能批改本班作业
+              const isMyClass = row.examClassIds.includes(userInfo.value?.userInfo.teacherClass || -9999);
+              return (
+                flag && isMyClass && <NButton type="primary" onClick={() => onCorrecting(row)}>批改</NButton>
+              );
+            },
+          },
+
+          {
+            title: '操作',
+            key: '',
+            render (row) {
+              // 是否已开始
+              const isStarted = row.examDate < +new Date();
+              // 是否是我创建的
+              const isMine = row.createBy === userInfo.value?.userInfo.teacherId;
+              // 是否是超级管理员
+              const hasAuth = userInfo.value?.userInfo.taecherRole === TeacherRole.super || isMine;
+
+              const btnDisabled = !hasAuth || (isStarted);
+
+              function getTooltip (actionName: string, trigger: () => JSX.Element) {
+                return (
+                  <NTooltip disabled={!btnDisabled} trigger="hover">
+                    {{
+                      default: () => (
+                        <span>{(!hasAuth
+                          ? `您不能${actionName}别人创建的考试信息`
+                          : isStarted
+                            ? `考试开始时间已过，不能${actionName}`
+                            : null
+                        )}</span>
+                      ),
+                      trigger,
+                    }}
+                  </NTooltip>
+                );
+              }
+
+
+              return (
+                <>
+                  {getTooltip('编辑', () => (
+                    <span onClick={() => !btnDisabled && onEdit(row)} style="cursor: pointer;">
+                      <NIcon size={22} color={btnDisabled ? 'gray' : 'white'}>
+                        <Edit />
+                      </NIcon>
+                    </span>
+                  ))}
+                  <NPopconfirm
+                    class="global--n-popconfirm"
+                    negativeText="取消"
+                    positiveText="确认"
+                    disabled={btnDisabled}
+                    onPositiveClick={() => onRemove(row)}
+                    // onNegativeClick="handleNegativeClick"
+                  >
+                    {{
+                      trigger: () => {
+                        return getTooltip('删除', () => (
+                          <NIcon size={22} color={btnDisabled ? 'gray' : 'white'} style="margin-left: 16px; cursor: pointer;">
+                            <Trash />
+                          </NIcon>
+                        ));
+                      },
+                      default: () => (
+                        <div>
+                          <NP>
+                            <p>删除后无法恢复。</p>
+                            <p style="font-size: 12px; color: gray;"></p>
+                          </NP>
+                        </div>
+                      ),
+                    }}
+                  </NPopconfirm>
+                </>
+              );
             },
           },
         ] as DataTableColumns<API__Examination.TableStruct__Examination>}

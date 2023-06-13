@@ -1,6 +1,5 @@
 import ky from 'ky'
 import { get, set, remove } from './storage'
-import router from '../router/tikusys'
 
 interface TokenResult {
   token_type: string

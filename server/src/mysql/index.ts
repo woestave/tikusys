@@ -3,13 +3,17 @@ import { getSQLTable } from './SQL';
 import { PoolConnection } from 'mysql2';
 import { tap } from 'ramda';
 
-// 创建一个数据库连接
-export const mysqlPool = mysql.createPool({
+const mysql_CONFIG = {
   host: 'localhost',
-  user: 'root',
-  password: '150816',
-  database: 'teach_server',
-});
+  /** 线上线下数据库用户保持一致 */
+  user: 'tiku_server',
+  password: '123456',
+  database: 'tiku_server',
+} as const;
+// 创建一个数据库连接
+export const mysqlPool = mysql.createPool(mysql_CONFIG);
+
+// console.log('数据库连接信息：', JSON.stringify(mysql_CONFIG, null, 2));
 
 
 export const SQL_CURD = getSQLTable(mysqlPool);

@@ -31,12 +31,32 @@ namespace API__Tiku {
 
 
 
-  export interface CreateReq {
+  interface CreateOrUpdateReq {
     question: DefaultQuestionModel;
   }
+  interface CreateOrUpdateRes {
+    succ: 1 | 0;
+    type: 'create' | 'update';
+  }
 
+
+  export interface CreateReq extends CreateOrUpdateReq {}
   export interface CreateRes {
     succ: 1;
+  }
+
+
+  interface UpdateReq extends CreateOrUpdateReq {}
+  interface UpdateRes {
+    succ: 1 | 0;
+  }
+
+
+  interface RemoveReq {
+    id: number;
+  }
+  interface RemoveRes {
+    succ: number;
   }
 
 
@@ -57,5 +77,15 @@ namespace API__Tiku {
      * 总条数
      */
     total: number;
+  }
+
+
+
+
+  interface GetByIdReq {
+    tId: number;
+  }
+  interface GetByIdRes {
+    tiItem: TableStruct__Tiku | null;
   }
 }

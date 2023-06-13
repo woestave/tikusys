@@ -3,7 +3,7 @@ import { functionalComponent, useCallbackP } from '@/utils/functional-component'
 import './Overview.less';
 import { PageTitle } from '@/components/PageTitle';
 import { PageSubTitle } from '@/components/PageSubTitle';
-import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NH3, NInput, NSelect, PaginationInfo } from 'naive-ui';
+import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NH3, NIcon, NInput, NP, NPopconfirm, NSelect, PaginationInfo, useMessage } from 'naive-ui';
 import { reactive, ref } from 'vue';
 import { classServices } from '@/apis/services/class';
 import { prop, tap } from 'ramda';
@@ -11,6 +11,19 @@ import { useCommonDataPinia } from '@/store/common-data.pinia';
 import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
 import { sleepCurrying } from 'common-packages/utils/sleep';
 import { globalLoading } from '@/utils/create-loading';
+import { Edit } from '@vicons/tabler';
+import { Trash } from '@vicons/ionicons5';
+import { RenderPrefix } from 'naive-ui/es/pagination/src/interface';
+
+function getDefaultClassForm () {
+  return {
+    classType: null,
+    className: '',
+    id: 0,
+    classMajor: null,
+    classTeacher: [],
+  };
+}
 
 
 interface CreateClassForm extends Omit<API__Class.CreateReq, 'classType' | 'classMajor'> {
@@ -22,19 +35,34 @@ export default functionalComponent(() => {
 
   const commonDataPinia = useCommonDataPinia();
 
-  const [ classList, getClassList, getClassListStatus ] = useCallbackP(() => classServices.list({}).then(prop('data')));
+  const message = useMessage();
 
-  getClassList();
+  const pagination = reactive<Partial<PaginationInfo & {
+    prefix: RenderPrefix;
+  }>>({
+    pageSize: 10,
+    page: 1,
+    itemCount: 0,
+    prefix: ({ itemCount }) => `${itemCount}条记录`,
+  });
+
+  const [ classList, getClassList, getClassListStatus ] = useCallbackP(() => classServices.list({
+    pageNumber: pagination.page,
+    pageSize: pagination.pageSize,
+  }).then(prop('data')));
+
+  function getClassListWithPage () {
+    return getClassList().then((res) => {
+      pagination.itemCount = res.total;
+      return res;
+    });
+  }
+  getClassListWithPage();
 
   const formRef = ref<FormInst | null>(null);
 
-  const createClassForm = ref<CreateClassForm>({
-    classType: null,
-    className: '',
-    id: 0,
-    classMajor: null,
-    classTeacher: [],
-  });
+  const isEditing = ref(false);
+  const createClassForm = ref<CreateClassForm>(getDefaultClassForm());
 
   const rules: FormRules = {
     className: {
@@ -59,11 +87,28 @@ export default functionalComponent(() => {
     },
   };
 
-  const pagination = reactive<Partial<PaginationInfo>>({
-    pageSize: 10,
-    page: 1,
-    itemCount: 0,
-  });
+
+  function onEdit (row: API__Class.TableStruct__Class) {
+    isEditing.value = true;
+    createClassForm.value = {...row};
+    document.querySelector('.class-overview')?.scrollIntoView({ behavior: 'smooth', });
+  }
+  function onEditCancel () {
+    isEditing.value = false;
+    createClassForm.value = getDefaultClassForm();
+  }
+
+  const removeClassLoading = globalLoading.useCreateLoadingKey({ name: '删除班级...' });
+  function onRemove (row: API__Class.TableStruct__Class) {
+    removeClassLoading.show();
+    classServices.remove({ id: row.id }).then((res) => {
+      res.data.succ === 1 && message.success('删除班级成功');
+      isEditing.value = false;
+      onClear();
+      getClassListWithPage();
+    }).finally(removeClassLoading.hide);
+  }
+
 
   const createColumns = ({}: {}): DataTableColumns<API__Class.TableStruct__Class> => {
     return [
@@ -107,60 +152,64 @@ export default functionalComponent(() => {
           );
         }
       },
-      // {
-      //   title: '操作',
-      //   key: 'actions',
-      //   width: 160,
-      //   align: 'center',
-      //   render (row) {
-      //     return (
-      //       <>
-      //         <NButton size="small" text onClick={() => onEdit(row)}>
-      //           <NIcon size={22}>
-      //             <Edit />
-      //           </NIcon>
-      //         </NButton>
-      //         <NPopconfirm
-      //           class="global--n-popconfirm"
-      //           negativeText="取消"
-      //           positiveText="确认"
-      //           onPositiveClick={() => onRemove(row)}
-      //           // onNegativeClick="handleNegativeClick"
-      //         >
-      //           {{
-      //             trigger: () => (
-      //               <NButton size="small" text style="margin-left: 16px;">
-      //                 <NIcon size={22}>
-      //                   <Trash />
-      //                 </NIcon>
-      //               </NButton>
-      //             ),
-      //             default: () => (
-      //               <div>
-      //                 <NP>
-      //                   <p>删除后无法恢复。</p>
-      //                   <p style="font-size: 12px; color: gray;">被引用的试题，请在取消被引用后再删除。</p>
-      //                 </NP>
-      //               </div>
-      //             ),
-      //           }}
-      //         </NPopconfirm>
-      //       </>
-      //     );
-      //   }
-      // }
+      {
+        title: '学生数量',
+        key: 'studentCount',
+      },
+      {
+        title: '操作',
+        key: 'actions',
+        width: 160,
+        align: 'center',
+        render (row) {
+          return (
+            <>
+              <NButton size="small" text onClick={() => onEdit(row)}>
+                <NIcon size={22}>
+                  <Edit />
+                </NIcon>
+              </NButton>
+              <NPopconfirm
+                class="global--n-popconfirm"
+                negativeText="取消"
+                positiveText="确认"
+                onPositiveClick={() => onRemove(row)}
+                // onNegativeClick="handleNegativeClick"
+              >
+                {{
+                  trigger: () => (
+                    <NButton size="small" text style="margin-left: 16px;">
+                      <NIcon size={22}>
+                        <Trash />
+                      </NIcon>
+                    </NButton>
+                  ),
+                  default: () => (
+                    <div>
+                      <NP>
+                        <p>删除后无法恢复。</p>
+                        <p style="font-size: 12px; color: gray;">有学生的班级不能删除。</p>
+                      </NP>
+                    </div>
+                  ),
+                }}
+              </NPopconfirm>
+            </>
+          );
+        }
+      }
     ]
   }
 
   const columns = createColumns({});
 
-  const createClassLoading = globalLoading.useCreateLoadingKey({ name: '新建班级...' });
+  const createClassLoading = globalLoading.useCreateLoadingKey({ name: '班级保存中...' });
   const getClassListLoading = globalLoading.useCreateLoadingKey({ name: '获取新的班级列表...' });
 
 
   function onUpdatePageNumber (newPageNumber: number) {
     pagination.page = newPageNumber;
-    getClassList();
+    getClassListWithPage();
   }
 
 
@@ -172,12 +221,12 @@ export default functionalComponent(() => {
     createClassForm.value.id = 0;
   }
 
-  function onSubmit () {
+  function onSubmitOrEdit () {
     formRef.value?.validate().then(() => {
       createClassLoading.show();
       getClassListLoading.show();
       classServices
-        .create({
+        .createOrUpdate({
           ...createClassForm.value,
           classType: createClassForm.value.classType!,
           classMajor: createClassForm.value.classMajor!,
@@ -186,8 +235,10 @@ export default functionalComponent(() => {
         .then(tap(createClassLoading.hide))
         .then((res) => {
           console.log('成功', res);
+          message.success(isEditing.value ? '修改班级成功' : '新建班级成功');
+          isEditing.value = false;
           onClear();
-          return getClassList().then(sleepCurrying(300)).finally(getClassListLoading.hide);
+          return getClassListWithPage().then(sleepCurrying(300)).finally(getClassListLoading.hide);
         }).finally(createClassLoading.hide);
     });
   }
@@ -197,7 +248,7 @@ export default functionalComponent(() => {
       <PageTitle />
       <PageSubTitle>班级管理大盘</PageSubTitle>
       <NDivider />
-      <NH3>班级新建</NH3>
+      <NH3>班级{isEditing.value ? '编辑' : '新建'}</NH3>
       <NForm
         class="class-overview-create-form"
         ref={formRef}
@@ -232,8 +283,21 @@ export default functionalComponent(() => {
           />
         </NFormItem>
         <div class="form-actions">
-          <NButton class="clear-btn" ghost round type="error" onClick={onClear}>清空</NButton>
-          <NButton type="primary" round onClick={onSubmit}>新建</NButton>
+          {
+            isEditing.value
+              ? (
+                <>
+                  <NButton class="clear-btn" ghost round type="error" onClick={onEditCancel}>取消编辑</NButton>
+                  <NButton type="primary" round onClick={onSubmitOrEdit}>确认修改</NButton>
+                </>
+              )
+              : (
+                <>
+                  <NButton class="clear-btn" ghost round type="error" onClick={onClear}>清空</NButton>
+                  <NButton type="primary" round onClick={onSubmitOrEdit}>新建</NButton>
+                </>
+              )
+          }
         </div>
       </NForm>
       <NDivider />

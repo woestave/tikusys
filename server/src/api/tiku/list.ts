@@ -45,11 +45,8 @@ export default routePOST<API__Tiku.ListReq, API__Tiku.ListRes>(async (context) =
   //   sql: F.sql(),
   // };
 
-  return (
-    typeof body.pageNumber === 'number' && typeof body.pageSize === 'number'
-    ? F.limit((body.pageNumber - 1) * body.pageSize, body.pageSize)
-    : F
-  )
+  return F
+    .pagination(body.pageNumber, body.pageSize)
     .exec()
     .then((tikuList) => {
 

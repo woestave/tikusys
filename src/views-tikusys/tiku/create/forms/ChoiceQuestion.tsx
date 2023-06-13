@@ -18,12 +18,11 @@ import { MoveSharp } from '@vicons/ionicons5';
 import './ChoiceQuestion.less';
 import { prop } from 'ramda';
 import { TikuCreateCommonForm } from './TikuCreateCommonForm';
-import { useNotificationPreset1 } from '@/hooks/use-notification-with-duration';
 import { getAToZ } from '@/utils/a-to-z';
 import { ChoiceQuestionModel, genChoiceModel, getDefaultChoiceQuestionModel, getDefaultChoises } from 'common-packages/models/question-model-choice';
-import { tikuServices } from '@/apis/services/tiku';
-import { globalLoading } from '@/utils/create-loading';
 import { DeleteFilled } from '@vicons/material';
+import { ExposeType } from './expose-type';
+import useEditWatch from './use-edit-watch';
 
 
 const CONFIGS = {
@@ -36,16 +35,15 @@ const CONFIGS = {
 
 
 export interface ChoiceQuestionProps {
+  onSubmit: (model: ChoiceQuestionModel) => void;
+  editingTiItem?: ChoiceQuestionModel | null;
 }
 
 export const ChoiceQuestion = functionalComponent<ChoiceQuestionProps>((props) => {
 
-  const showSuccessNotification = useNotificationPreset1('新建选择题成功', '去试题列表看看');
-
 
   const [model, setModel] = useState<ChoiceQuestionModel>(getDefaultChoiceQuestionModel());
 
-  const loading = globalLoading.useCreateLoadingKey({ name: '新建选择题...' });
 
   function resetModel () {
     setModel({
@@ -64,6 +62,15 @@ export const ChoiceQuestion = functionalComponent<ChoiceQuestionProps>((props) =
     containerKey.value++;
   }
 
+  useEditWatch<ChoiceQuestionModel>(() => props.editingTiItem, setModel);
+
+  const exposes: ExposeType = {
+    resetAll,
+    setModel,
+    questionType: model.value.customQuestionInfo.questionType,
+  } as ExposeType;
+  props.context.expose(exposes);
+
   /**
    * 自定义验证
    */
@@ -72,17 +79,8 @@ export const ChoiceQuestion = functionalComponent<ChoiceQuestionProps>((props) =
   }
   function onSubmit (onValidate: () => Promise<void>) {
     onValidate().then(() => {
-      loading.show();
-      tikuServices
-        .create({ question: model.value, })
-        .then((res) => {
-          console.log('添加成功', res);
-          resetAll();
-          showSuccessNotification(5000);
-        }).catch((err) => {
-          console.log('添加失败', err);
-        }).finally(loading.hide);
-      });
+      props.onSubmit?.(model.value);
+    });
   }
 
   function onRemoveChoice (index: number) {

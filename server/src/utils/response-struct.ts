@@ -4,12 +4,19 @@ function createGenCode (start: number) {
   let __start = start;
 
   return function () {
-    return __start++;
+    const res = __start++;
+    // if (res >)
+    return res;
   };
 }
 
 const genReqErrorCode = createGenCode(20000);
+const genExampaperErrorCode = createGenCode(30000);
+const genExamResultErrorCode = createGenCode(40000);
+const getTikuError = createGenCode(50000);
 const genLoginErrorCode = createGenCode(80000);
+
+const genClassErrorCode = createGenCode(90000);
 
 export const ERR_CODES = {
   noError: 0,
@@ -19,7 +26,13 @@ export const ERR_CODES = {
   canNotEmpty: 100078,
   fatal: 500,
   loginIncorrect: genLoginErrorCode(),
+  oldPwdWrong: genLoginErrorCode(),
   reqBodyError: genReqErrorCode(),
+  tikuError: getTikuError(),
+  tikuReferencedRemoveError: getTikuError(),
+  exampaperNotExists: genExampaperErrorCode(),
+  examResultNotExists: genExamResultErrorCode(),
+  classHasStudentCannotDelete: genClassErrorCode(),
 } as const;
 
 
@@ -36,8 +49,11 @@ export const ERR_MESSAGES = {
   apiNotAFunction: `api path is not a function`,
   canNotEmpty: 'The \`response body\` cannot be empty.',
   reqBodyError: '参数校验不通过',
+  oldPwdWrong: '旧密码输入错误',
   permissionDenied: 'Permission denied',
   loginIncorrect: '用户名或密码错误',
+  classHasStudentCannotDelete: '不能删除存在学生的班级',
+  tikuReferencedRemoveError: '已经被试卷引用过的试题暂时不可删除',
 } as const;
 
 

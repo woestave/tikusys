@@ -1,11 +1,15 @@
-import { ERR_CODES, ERR_MESSAGES, getResponseStruct } from "../utils/response-struct";
+import { ERR_CODES, ERR_MESSAGES, ResponseStruct, getResponseStruct } from "../utils/response-struct";
 import { RouteContext } from "./route";
 import chalk from 'chalk';
 import path from 'path';
 
 
 function getErrorStr (err: any) {
-  return (err?.toString?.() || err?.message || err)?.split('Require stack:')?.[0] || err?.toString();
+  if (err instanceof ResponseStruct) {
+    return err.errMsg;
+  }
+  return (err?.toString?.() || err?.message || err) || err?.toString();
+  // return (err?.toString?.() || err?.message || err)?.split('Require stack:')?.[0] || err?.toString();
 }
 
 
@@ -53,14 +57,16 @@ export function createRouter (config = {
               sendBody(getResponseStruct(ERR_CODES.noError, 'success', res || null));
             })
             .catch((err) => {
-              console.error(chalk.yellow('create-router::exec-err', err));
-              sendBody(getResponseStruct(ERR_CODES.fatal, getErrorStr(err), null), 500);
+              const errStr = getErrorStr(err);
+              console.error(chalk.yellow('create-router::exec-err', errStr));
+              sendBody(getResponseStruct(ERR_CODES.fatal, errStr, null), /**500*/ 200);
             });
         }
       })
       .catch((err) => {
-        console.error(chalk.red('create-router::import-err', err));
-        sendBody(getResponseStruct(ERR_CODES.fatal, getErrorStr(err), null), 500);
+        const errStr = getErrorStr(err);
+        console.error(chalk.red('create-router::import-err', errStr));
+        sendBody(getResponseStruct(ERR_CODES.fatal, errStr, null), 500);
       });
   }
 }

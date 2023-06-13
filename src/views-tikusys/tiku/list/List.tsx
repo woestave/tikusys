@@ -1,6 +1,6 @@
 import { functionalComponent, useCallbackP } from '@/utils/functional-component';
 import './List.less';
-import { FormInst, FormRules, NDivider, NForm, NFormItemGi, NGrid, NIcon, NInput, NP, NPopconfirm, NPopover, NSelect, PaginationInfo } from 'naive-ui';
+import { FormInst, FormRules, NDivider, NForm, NFormItemGi, NGrid, NIcon, NInput, NP, NPopconfirm, NPopover, NSelect, PaginationInfo, useMessage } from 'naive-ui';
 import { PageTitle } from '@/components/PageTitle';
 import { NButton } from 'naive-ui'
 import { DataTableColumns, NDataTable } from 'naive-ui'
@@ -16,6 +16,10 @@ import { withResponseType } from '@/apis/request';
 import { ChoiceQuestionContent, QuestionContentBase } from '@/components/QuestionContentBase';
 import { ChoiceQuestionModel, filterIsChoiceQuestion } from 'common-packages/models/question-model-choice';
 import { globalTextHighlightProcessor } from '@/utils/create-text-highlight-processor';
+import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
+import { RenderPrefix } from 'naive-ui/es/pagination/src/interface';
+import { useRouter } from 'vue-router';
+import { globalLoading } from '@/utils/create-loading';
 
 
 // const data = getAllQuestions();
@@ -27,6 +31,10 @@ export default functionalComponent(() => {
 
   const commonDataPinia = useCommonDataPinia();
 
+  const router = useRouter();
+
+  const message = useMessage();
+
   const filterForm = ref<Omit<API__Tiku.ListReq, keyof API__BaseTypes.Pagination>>({
     id: '',
     tName: '',
@@ -34,10 +42,13 @@ export default functionalComponent(() => {
     major: null,
   });
 
-  const pagination = reactive<Partial<PaginationInfo>>({
+  const pagination = reactive<Partial<PaginationInfo & {
+    prefix: RenderPrefix;
+  }>>({
     pageSize: 10,
     page: 1,
     itemCount: 0,
+    prefix: ({ itemCount }) => `${itemCount}条记录`,
   });
 
   const [tikuList, getTikuList, getTikuListStatus] = useCallbackP(
@@ -70,8 +81,8 @@ export default functionalComponent(() => {
     onRemove,
     onEdit,
   }: {
-    onRemove: (row: API__Tiku.TableStruct__Tiku) => void;
-    onEdit: (row: API__Tiku.TableStruct__Tiku) => void;
+    onRemove: (row: API__Tiku.TikuStructWithPaperInfo) => void;
+    onEdit: (row: API__Tiku.TikuStructWithPaperInfo) => void;
   }): DataTableColumns<API__Tiku.TikuStructWithPaperInfo & { customQuestionInfo: any; }> => {
     return [
       {
@@ -149,7 +160,15 @@ export default functionalComponent(() => {
                 <ReferenceTag
                   label={'试卷 - ' + x.paperName}
                   type="info"
-                  onClickLink={console.log}
+                  onClickLink={() => router.push({
+                    name: 'exampaper-create',
+                    params: {
+                      paperId: x.paperId,
+                    },
+                    query: {
+                      fromTid: row.id,
+                    },
+                  })}
                   referLink={'查看试卷'}
                 />
               ))}
@@ -180,7 +199,7 @@ export default functionalComponent(() => {
           return (
             <>
               <NButton size="small" text onClick={() => onEdit(row)}>
-                <NIcon size={22}>
+                <NIcon size={22} color={row.paperInfo.length ? '#333' : 'white'}>
                   <Edit />
                 </NIcon>
               </NButton>
@@ -194,7 +213,7 @@ export default functionalComponent(() => {
                 {{
                   trigger: () => (
                     <NButton size="small" text style="margin-left: 16px;">
-                      <NIcon size={22}>
+                      <NIcon size={22} color={row.paperInfo.length ? '#333' : 'white'}>
                         <Trash />
                       </NIcon>
                     </NButton>
@@ -216,8 +235,29 @@ export default functionalComponent(() => {
     ]
   }
 
-  function onRemove () {}
-  function onEdit () {}
+
+  const removeTikuLoading = globalLoading.useCreateLoadingKey({ name: '移除试题...', });
+  function onRemove (row: API__Tiku.TikuStructWithPaperInfo) {
+    if (row.paperInfo.length) {
+      return message.error(`已经被试卷引用过的试题暂时不可删除`);
+    }
+    removeTikuLoading.show();
+    tikuServices.remove({id: row.id}).then((res) => {
+      res.data.succ === 1 && message.success('删除试题成功');
+      getTikuList();
+    }).finally(removeTikuLoading.hide);
+  }
+  function onEdit (row: API__Tiku.TikuStructWithPaperInfo) {
+    if (row.paperInfo.length) {
+      return message.error(`已经被试卷引用过的试题暂时不可编辑`);
+    }
+    router.push({
+      name: 'tiku-create',
+      params: {
+        tId: row.id,
+      },
+    });
+  }
 
   const columns = createColumns({
     onRemove,
@@ -268,7 +308,7 @@ export default functionalComponent(() => {
               v-model:value={filterForm.value.phase}
               multiple
               clearable
-              onClear={() => setTimeout(getTikuList)}
+              onClear={() => setTimeout(onClickSearch)}
               options={commonDataPinia.commonData?.phases || []}
               placeholder="请选择阶段"
             ></NSelect>
@@ -276,8 +316,10 @@ export default functionalComponent(() => {
           <NFormItemGi span={6} label="专业">
             <NSelect
               v-model:value={filterForm.value.major}
-              options={[]}
+              options={commonDataPinia.majors as SelectMixedOption[]}
               placeholder="请选择专业"
+              clearable
+              onClear={() => setTimeout(onClickSearch)}
             ></NSelect>
           </NFormItemGi>
           <NFormItemGi span={3}>

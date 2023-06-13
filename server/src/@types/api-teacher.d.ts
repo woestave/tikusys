@@ -11,14 +11,39 @@ namespace API__Teacher {
     teacherRole: TeacherRole;
   }
 
-  interface CreateReq extends Omit<TableStruct__Teacher, 'teacherPwd' | 'teacherCreateTime'> {}
+  interface CreateOrUpdateReq extends Omit<TableStruct__Teacher, 'teacherPwd' | 'teacherCreateTime'> {}
+  interface CreateOrUpdateRes {
+    succ: 1 | 0;
+    type: 'create' | 'update';
+  }
+
+
+  interface CreateReq extends CreateOrUpdateReq {}
   interface CreateRes {
     succ: 1;
   }
 
-  interface ListReq {}
+  interface UpdateReq extends CreateOrUpdateReq {}
+  interface UpdateRes {
+    succ: 1 | 0;
+  }
+
+  interface RemoveReq {
+    id: number;
+  }
+  interface RemoveRes {
+    succ: number;
+  }
+
+  interface ListReq extends API__BaseTypes.Pagination {
+    teacherName?: string | null;
+    teacherClass?: number | null;
+    teacherStatus?: number | null;
+    teacherRole?: number | null;
+  }
   interface ListRes {
     list: TableStruct__Teacher[];
+    total: number;
   }
 
 
@@ -61,5 +86,16 @@ namespace API__Teacher {
       taecherRole: TableStruct__Teacher['teacherRole'];
       teacherStatus: TableStruct__Teacher['teacherStatus'];
     };
+  }
+
+
+
+
+  interface TeacherUpdatePasswordReq {
+    oldPwd: string;
+    newPwd: string;
+  }
+  interface TeacherUpdatePasswordRes {
+    succ: 1;
   }
 }

@@ -5,10 +5,7 @@ import crypto from 'crypto';
 import { crypto_md5 } from '#/utils/md5';
 
 
-
-export default routePOST<API__Teacher.CreateReq, API__Teacher.CreateRes>((context) => {
-  const body = context.request.body;
-
+export function teacherCreate (body: API__Teacher.CreateReq) {
   function genDefaultTeacherPwd () {
     return crypto_md5(body.teacherIdCard);
   }
@@ -20,6 +17,11 @@ export default routePOST<API__Teacher.CreateReq, API__Teacher.CreateRes>((contex
       teacherCreateTime: +new Date(),
     }
   ]).exec().then((res) => ({
-    succ: 1,
+    succ: 1 as const,
   }));
+}
+
+
+export default routePOST<API__Teacher.CreateReq, API__Teacher.CreateRes>((context) => {
+  return teacherCreate(context.request.body);
 });

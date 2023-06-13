@@ -22,7 +22,7 @@ export default routePOST<API__Examsys__User.GetMyExamResultReq, API__Examsys__Us
     .exec()
     .then(([myExamResult]) => {
       return myExamResult ? {
-        ...myExamResult || {},
+        ...myExamResult,
         examResultAnswerInfo: JSON.parse(querystring.unescape(myExamResult.examResultAnswerInfo)) as API__ExamResult.ExamResultAnswerInfoParsed,
       } : null;
     });

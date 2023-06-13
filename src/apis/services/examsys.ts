@@ -4,6 +4,8 @@ const examsysServices = {
   getUserInfo: requestPostFactory<null, API__Examsys__User.GetUserInfoRes>('examsys/get-user-info'),
   login: requestPostFactory<API__Examsys__User.LoginReq, API__Examsys__User.LoginRes>('examsys/login'),
   logout: requestPostFactory<null, API__Examsys__User.LogoutRes>('examsys/logout'),
+  updatePassword: requestPostFactory<API__Examsys__User.UpdatePasswordReq, API__Examsys__User.UpdatePasswordRes>('examsys/update-password'),
+  resetPassword: requestPostFactory<null, API__Examsys__User.UpdatePasswordRes>('examsys/reset-password'),
   getMyExam: requestPostFactory<null, API__Examsys__User.GetMyExamRes>('examsys/get-my-exam'),
   getExamDetail: requestPostFactory<API__Examsys__User.GetExamDetailReq, API__Examsys__User.GetExamDetailRes>('examsys/get-exam-detail'),
   getTiListByPaperId: requestPostFactory<API__Examsys__User.GetTiListByPaperIdReq, API__Examsys__User.GetTiListByPaperIdRes>('examsys/get-ti-list-by-paper-id'),

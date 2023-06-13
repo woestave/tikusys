@@ -71,6 +71,7 @@ const me = ref({
 
 const options = computed(() => [
   { key: 'me', label: 'Hi, ' + me.value?.name as string, },
+  { key: 'update-password', label: '修改密码', },
   { key: 'logout', label: '退出登录' }
 ])
 
@@ -97,6 +98,10 @@ const handleOptionsSelect = async (key: unknown): Promise<void> => {
   if (key === 'logout') {
     tokens.removeToken();
     location.reload();
+  } else if (key === 'update-password') {
+    router.push({
+      name: 'update-password',
+    });
   }
 }
 </script>

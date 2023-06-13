@@ -13,5 +13,6 @@ export const Tables = {
   Student: SQL_CURD.of<API__Student.TableStruct__Student>('student'),
   Teacher: SQL_CURD.of<API__Teacher.TableStruct__Teacher>('teacher'),
   ExamResult: SQL_CURD.of<API__ExamResult.TableStruct__ExamResult>('exam_result'),
+  Major: SQL_CURD.of<API__Major.TableStruct__Major>('major'),
 } as const;
 

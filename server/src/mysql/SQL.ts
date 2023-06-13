@@ -49,7 +49,7 @@ const andSymbol = Symbol('and');
 interface SQLTableValue<T extends object> {
   tableName: string;
   insertData?: Omit<{ [K in keyof T]: T[K] extends object ? string : T[K]; }, any>[];
-  updateData?: Partial<T>;
+  updateData?: Partial<{ [K in keyof T]: T[K] extends object ? string : T[K]; }>;
   limit?: SQLLimit;
   selectFields?: string[];
   orderByFields?: string[];
@@ -125,7 +125,7 @@ export function getSQLTable (mysqlPool: import('mysql2').Pool) {
       });
     }
 
-    public update (newData: Partial<T>) {
+    public update (newData: Partial<this['StructIn']>) {
       return this.of<T, 'U'>({
         updateData: newData,
         sqlType: 'U',
@@ -145,6 +145,12 @@ export function getSQLTable (mysqlPool: import('mysql2').Pool) {
         sqlType: 'R',
         selectFields: fields,
       });
+    }
+
+    public pagination (pageNumber?: number, pageSize?: number) {
+      return (typeof pageNumber === 'number' && typeof pageSize === 'number')
+        ? this.limit((pageNumber - 1) * pageSize, pageSize)
+        : this;
     }
 
 
@@ -190,7 +196,7 @@ export function getSQLTable (mysqlPool: import('mysql2').Pool) {
         whereList: [
           ...this.__value.whereList || [],
           ...this.__checkWherePrevHasOp() ? [] : [andSymbol] as const,
-          { key, op, value, type: 'normal', },
+          { key, op, value: value as number, type: 'normal', },
         ],
       });
     }
