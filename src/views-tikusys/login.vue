@@ -30,6 +30,8 @@ import { personnelServices } from '@/apis/services/personnel';
 import { tokens } from '@/apis/request';
 import { useCommonDataPinia } from '@/store/common-data.pinia';
 
+const RSD_TIKUSYS_PREV_LOGIN_UNAME = 'RSD_TIKUSYS_PREV_LOGIN_UNAME';
+
 const router = useRouter();
 
 const rules = {
@@ -46,8 +48,8 @@ const rules = {
 };
 
 const model = ref({
-  username: 'zce',
-  password: 'wanglei'
+  username: localStorage.getItem(RSD_TIKUSYS_PREV_LOGIN_UNAME) || '',
+  password: ''
 });
 
 const loading = ref(false);
@@ -63,6 +65,7 @@ const handleLogin = async (e: Event): Promise<void> => {
   personnelServices
     .login(model.value)
     .then((res) => {
+      localStorage.setItem(RSD_TIKUSYS_PREV_LOGIN_UNAME, model.value.username);
       tokens.setToken(res.data.token);
       // const route = router.currentRoute.value;
       // const redirect = route.query.redirect?.toString();

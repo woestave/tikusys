@@ -1,6 +1,9 @@
 import { routePOST } from "#/routes/route";
+import { TeacherRole } from "common-packages/constants/teacher-role";
 
-export default routePOST<null, API__LeftMenu.Res>(() => {
+export default routePOST<null, API__LeftMenu.Res>((context) => {
+  const userInfo = context.state.user as API__Teacher.GetUserInfoRes['userInfo'];
+
   return {
     list: [
       {
@@ -62,44 +65,50 @@ export default routePOST<null, API__LeftMenu.Res>(() => {
           },
         ],
       },
-      {
-        id: '810159148224d543ae4e05cc',
-        label: '班级管理',
-        icon: 'ClassFilled',
-        children: [
-          {
-            id: 'class-overview',
-            label: '班级大盘',
-            // icon: 'ListSharp',
-            routeName: 'class-overview',
-          },
-          // {
-          //   id: 'class-types',
-          //   label: '班级类型',
-          //   // icon: 'ListSharp',
-          //   routeName: 'class-types',
-          // },
-        ],
-      },
-      {
-        id: '710159148224d543ae4e05cc',
-        label: '人员管理',
-        icon: 'PeopleSharp',
-        children: [
-          {
-            id: 'personnel-student',
-            label: '学生管理',
-            // icon: 'ListSharp',
-            routeName: 'personnel-student',
-          },
-          {
-            id: 'personnel-teacher',
-            label: '教师管理',
-            // icon: 'PieChartSharp',
-            routeName: 'personnel-teacher',
-          },
-        ],
-      },
+      /**
+       * 超管拥有管理班级和人员的权限
+       * 其他角色只能查看试题管理面板
+       */
+      ...userInfo.taecherRole === TeacherRole.super ? [
+        {
+          id: '810159148224d543ae4e05cc',
+          label: '班级管理',
+          icon: 'ClassFilled',
+          children: [
+            {
+              id: 'class-overview',
+              label: '班级大盘',
+              // icon: 'ListSharp',
+              routeName: 'class-overview',
+            },
+            // {
+            //   id: 'class-types',
+            //   label: '班级类型',
+            //   // icon: 'ListSharp',
+            //   routeName: 'class-types',
+            // },
+          ],
+        },
+        {
+          id: '710159148224d543ae4e05cc',
+          label: '人员管理',
+          icon: 'PeopleSharp',
+          children: [
+            {
+              id: 'personnel-student',
+              label: '学生管理',
+              // icon: 'ListSharp',
+              routeName: 'personnel-student',
+            },
+            {
+              id: 'personnel-teacher',
+              label: '教师管理',
+              // icon: 'PieChartSharp',
+              routeName: 'personnel-teacher',
+            },
+          ],
+        },
+      ] : [],
     ],
   };
 });
