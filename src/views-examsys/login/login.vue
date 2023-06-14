@@ -27,6 +27,7 @@ import { useRouter } from 'vue-router';
 import { CONST_COMMON } from 'common-packages/constants/common';
 import examsysServices from '@/apis/services/examsys';
 import { tokens } from '@/apis/request';
+import { useCommonDataPinia } from '@/store/common-data.pinia';
 
 const router = useRouter();
 
@@ -51,6 +52,7 @@ const model = ref({
 });
 
 const loading = ref(false);
+const commonData = useCommonDataPinia();
 
 const disabled = computed<boolean>(() => model.value.username === '' || model.value.password === '');
 
@@ -61,9 +63,12 @@ const handleLogin = async (e: Event): Promise<void> => {
     .login(model.value)
     .then((res) => {
       tokens.setToken(res.data.token);
-      const route = router.currentRoute.value;
-      const redirect = route.query.redirect?.toString();
-      router.replace(redirect ?? route.redirectedFrom?.fullPath ?? '/');
+      // const route = router.currentRoute.value;
+      // const redirect = route.query.redirect?.toString();
+      commonData.fetchCommonData().then(() => {
+        // router.replace(redirect ?? route.redirectedFrom?.fullPath ?? '/');
+        router.replace('/');
+      });
     }).catch((e) => {
     }).finally(() => {
       loading.value = false;

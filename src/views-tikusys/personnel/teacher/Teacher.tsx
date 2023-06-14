@@ -258,7 +258,7 @@ export default functionalComponent(() => {
       <NDivider />
       <NForm labelAlign="left">
         <NGrid xGap={12}>
-          <NFormItemGi span={6} label="学生名称|证件号">
+          <NFormItemGi span={6} label="教师名称|证件号">
             <NInput
               type="text"
               maxlength={20}
@@ -284,7 +284,7 @@ export default functionalComponent(() => {
               options={commonDataPinia.studentStatus as SelectMixedOption[]}
               clearable
               onClear={() => setTimeout(getTeacherList)}
-              placeholder="学生状态"
+              placeholder="教师状态"
             />
           </NFormItemGi> */}
           <NFormItemGi span={3} label="职能">

@@ -35,6 +35,7 @@ import {
   Pencil,
   Library,
   PeopleSharp,
+  ArrowBack,
 } from '@vicons/ionicons5';
 import {
   ClassFilled,
@@ -72,6 +73,7 @@ const icons = {
   PeopleSharp,
   ClassFilled,
   PasswordFilled,
+  ArrowBack,
 };
 
 type IconTypes = keyof typeof icons

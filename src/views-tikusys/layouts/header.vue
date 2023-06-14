@@ -1,12 +1,16 @@
 <template>
   <n-layout-header bordered>
+    <n-button text @click="router.back()">
+      <icon type="ArrowBack" size="20" :depth="2" />
+    </n-button>
     <n-button text @click="router.go(0)">
       <icon type="refresh" size="20" :depth="2" />
     </n-button>
-    <n-breadcrumb>
+    <!-- <n-breadcrumb>
       <n-breadcrumb-item>Dashboard</n-breadcrumb-item>
       <n-breadcrumb-item>Home</n-breadcrumb-item>
-    </n-breadcrumb>
+    </n-breadcrumb> -->
+    <n-text>{{router.currentRoute.value.meta?.title}}</n-text>
     <n-space :size="20" align="center" style="line-height: 1">
       <n-tooltip>
         <template #trigger>
@@ -59,6 +63,7 @@ import { Icon } from '@/components'
 import { tokens } from '@/apis/request';
 import { onMounted } from 'vue';
 import { personnelServices } from '@/apis/services/personnel';
+import defaultAvatar from '@/assets/images/default-avatar.png';
 
 const router = useRouter()
 // const message = useMessage()
@@ -66,7 +71,7 @@ const router = useRouter()
 
 const me = ref({
   name: '',
-  avatar: '',
+  avatar: defaultAvatar,
 });
 
 const options = computed(() => [
