@@ -1,12 +1,14 @@
 import { personnelServices } from '@/apis/services/personnel';
 import { PageTitle } from '@/components/PageTitle';
+import { useRequest } from '@/hooks/use-request';
 import { useCommonDataPinia } from '@/store/common-data.pinia';
 import { globalLoading } from '@/utils/create-loading';
 import { functionalComponent, useCallbackP } from '@/utils/functional-component';
 import { Trash } from '@vicons/ionicons5';
 import { Edit } from '@vicons/tabler';
+import { TeacherRole } from 'common-packages/constants/teacher-role';
 import { sleepCurrying } from 'common-packages/utils/sleep';
-import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NFormItemGi, NGrid, NIcon, NInput, NP, NPopconfirm, NSelect, PaginationInfo, useMessage, } from 'naive-ui';
+import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NFormItemGi, NGrid, NIcon, NInput, NP, NPopconfirm, NSelect, NText, PaginationInfo, useMessage, } from 'naive-ui';
 import { RenderPrefix } from 'naive-ui/es/pagination/src/interface';
 import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
 import { reactive, ref } from 'vue';
@@ -68,6 +70,8 @@ export default functionalComponent(() => {
   });
 
   const commonDataPinia = useCommonDataPinia();
+
+  const [ userInfo ] = useRequest(personnelServices.getUserInfo());
 
   const pagination = reactive<Partial<PaginationInfo & {
     prefix: RenderPrefix;
@@ -148,7 +152,9 @@ export default functionalComponent(() => {
 
 
 
-  return () => (
+  return () => userInfo.value?.userInfo.taecherRole !== TeacherRole.super ? (
+    <NText>权限不足。</NText>
+  ) : (
     <div class="personnel-student">
       <PageTitle />
       <NDivider />

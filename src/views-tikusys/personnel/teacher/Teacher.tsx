@@ -7,13 +7,14 @@ import { functionalComponent, useCallbackP } from '@/utils/functional-component'
 import { TeacherRole } from 'common-packages/constants/teacher-role';
 import { sleepCurrying } from 'common-packages/utils/sleep';
 import { createValueLabelObj } from 'common-packages/utils/value-label-utils';
-import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NFormItemGi, NGrid, NIcon, NInput, NP, NPopconfirm, NSelect, PaginationInfo, useMessage, } from 'naive-ui';
+import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NFormItemGi, NGrid, NIcon, NInput, NP, NPopconfirm, NSelect, NText, PaginationInfo, useMessage, } from 'naive-ui';
 import { SelectMixedOption } from 'naive-ui/es/select/src/interface';
 import { computed, reactive, ref } from 'vue';
 import md5 from 'blueimp-md5';
 import { RenderPrefix } from 'naive-ui/es/pagination/src/interface';
 import { Edit } from '@vicons/tabler';
 import { Trash } from '@vicons/ionicons5';
+import { useRequest } from '@/hooks/use-request';
 window.md5 = md5;
 function getDefaultTeacherForm (): API__Teacher.CreateReq {
   return {
@@ -78,6 +79,10 @@ export default functionalComponent(() => {
   const message = useMessage();
 
   const commonDataPinia = useCommonDataPinia();
+
+
+  const [ userInfo ] = useRequest(personnelServices.getUserInfo());
+
 
   const teacherRoles = computed(() => {
     return Object.keys(commonDataPinia.teacherRoleMap).map((roleId) => {
@@ -184,7 +189,9 @@ export default functionalComponent(() => {
 
 
 
-  return () => (
+  return () => userInfo.value?.userInfo.taecherRole !== TeacherRole.super ? (
+    <NText>权限不足。</NText>
+  ) : (
     <div class="personnel-teacher">
       <PageTitle />
       <NDivider />

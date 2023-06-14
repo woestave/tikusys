@@ -3,7 +3,7 @@ import { functionalComponent, useCallbackP } from '@/utils/functional-component'
 import './Overview.less';
 import { PageTitle } from '@/components/PageTitle';
 import { PageSubTitle } from '@/components/PageSubTitle';
-import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NH3, NIcon, NInput, NP, NPopconfirm, NSelect, PaginationInfo, useMessage } from 'naive-ui';
+import { DataTableColumns, FormInst, FormRules, NButton, NDataTable, NDivider, NForm, NFormItem, NH3, NIcon, NInput, NP, NPopconfirm, NSelect, NText, PaginationInfo, useMessage } from 'naive-ui';
 import { reactive, ref } from 'vue';
 import { classServices } from '@/apis/services/class';
 import { prop, tap } from 'ramda';
@@ -14,6 +14,9 @@ import { globalLoading } from '@/utils/create-loading';
 import { Edit } from '@vicons/tabler';
 import { Trash } from '@vicons/ionicons5';
 import { RenderPrefix } from 'naive-ui/es/pagination/src/interface';
+import { TeacherRole } from 'common-packages/constants/teacher-role';
+import { useRequest } from '@/hooks/use-request';
+import { personnelServices } from '@/apis/services/personnel';
 
 function getDefaultClassForm () {
   return {
@@ -34,6 +37,10 @@ interface CreateClassForm extends Omit<API__Class.CreateReq, 'classType' | 'clas
 export default functionalComponent(() => {
 
   const commonDataPinia = useCommonDataPinia();
+
+
+  const [ userInfo ] = useRequest(personnelServices.getUserInfo());
+
 
   const message = useMessage();
 
@@ -243,7 +250,9 @@ export default functionalComponent(() => {
     });
   }
 
-  return () => (
+  return () => userInfo.value?.userInfo.taecherRole !== TeacherRole.super ? (
+    <NText>权限不足。</NText>
+  ) : (
     <div class="class-overview">
       <PageTitle />
       <PageSubTitle>班级管理大盘</PageSubTitle>
