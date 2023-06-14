@@ -2,6 +2,7 @@ node_modules
 .DS_Store
 dist
 online
+#online.zip
 dist-ssr
 server/node_modules
 
