@@ -4,12 +4,12 @@ import { FormInst, FormRules, NDivider, NForm, NFormItemGi, NGrid, NIcon, NInput
 import { PageTitle } from '@/components/PageTitle';
 import { NButton } from 'naive-ui'
 import { DataTableColumns, NDataTable } from 'naive-ui'
-import { reactive, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 import { Search } from '@vicons/ionicons5';
 import { Edit, Trash, } from '@vicons/tabler';
 import { useCommonDataPinia } from '@/store/common-data.pinia';
 import { getQuestionTypeText } from 'common-packages/helpers/get-question-type-text';
-import { prop } from 'ramda';
+import { omit, prop } from 'ramda';
 import ReferenceTag from '@/components/ReferenceTag';
 import { tikuServices } from '@/apis/services/tiku';
 import { withResponseType } from '@/apis/request';
@@ -113,7 +113,7 @@ export default functionalComponent(() => {
         },
         render (row) {
           return (
-            <span innerHTML={globalTextHighlightProcessor(row.tName || '', filterForm.value.tName)}></span>
+            <span class="white-space-pre" innerHTML={globalTextHighlightProcessor(row.tName || '', filterForm.value.tName)}></span>
           );
         }
       },
@@ -160,7 +160,9 @@ export default functionalComponent(() => {
                 <ReferenceTag
                   label={'试卷 - ' + x.paperName}
                   type="info"
-                  onClickLink={() => router.push({
+                  onClickLink={() => router.replace({
+                    query: { fromPage: pagination.page, },
+                  }).then(() => router.push({
                     name: 'exampaper-create',
                     params: {
                       paperId: x.paperId,
@@ -168,7 +170,7 @@ export default functionalComponent(() => {
                     query: {
                       fromTid: row.id,
                     },
-                  })}
+                  }))}
                   referLink={'查看试卷'}
                 />
               ))}
@@ -251,13 +253,29 @@ export default functionalComponent(() => {
     if (row.paperInfo.length) {
       return message.error(`已经被试卷引用过的试题暂时不可编辑`);
     }
-    router.push({
-      name: 'tiku-create',
-      params: {
-        tId: row.id,
-      },
+
+    router.replace({
+      // 方便回来时还保留在当前页数
+      query: { fromPage: pagination.page, },
+    }).then(() => {
+      router.push({
+        name: 'tiku-create',
+        params: {
+          tId: row.id,
+        },
+      });
     });
   }
+
+  onMounted(() => {
+    const fromPage = +(router.currentRoute.value.query.fromPage || 1);
+    console.warn(fromPage);
+    if (fromPage > 0 && !isNaN(fromPage)) {
+      pagination.page = fromPage;
+      router.replace({ query: omit(['fromPage'], router.currentRoute.value.query), });
+      getTikuList();
+    }
+  });
 
   const columns = createColumns({
     onRemove,

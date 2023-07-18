@@ -30,11 +30,12 @@ export default routePOST<{}, API__Examsys__User.GetMyExamRes>((context) => {
           return {
             // sql: F.sql(),
             list: list.map((x) => {
+              const myExamResult = examResultList.find((examResult) => {
+                return examResult.examResultExaminationId === x.id && examResult.examResultStudentId === userInfo.studentId
+              });
               return {
                 ...x,
-                isAnswered: !!examResultList.find((examResult) => {
-                  return examResult.examResultExaminationId === x.id && +examResult.examResultStudentId === +userInfo.studentId
-                }),
+                myExamResult: myExamResult || null,
               };
             }),
           };

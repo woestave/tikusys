@@ -25,7 +25,7 @@ export default routePOST<API__Examsys__User.LoginReq, API__Examsys__User.LoginRe
           studentClass: temp.studentClass,
           studentCreateTime: temp.studentCreateTime,
         };
-        const token = jwt.sign(userInfo, JWT_SECRET_TIKUSYS, { expiresIn: '1d', });
+        const token = jwt.sign(userInfo, JWT_SECRET_TIKUSYS, { expiresIn: '2d', });
         return {
           succ: 1,
           token,

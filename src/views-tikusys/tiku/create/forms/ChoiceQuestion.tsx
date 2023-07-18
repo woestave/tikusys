@@ -164,6 +164,7 @@ export const ChoiceQuestion = functionalComponent<ChoiceQuestionProps>((props) =
                   >
                     <NInput
                       value={x.label}
+                      type="textarea"
                       maxlength={CONFIGS.choiceLabel.maxLength}
                       minlength={CONFIGS.choiceLabel.minLength}
                       showCount

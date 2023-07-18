@@ -23,7 +23,7 @@ export const QuestionContentBase = functionalComponent<QuestionContentBaseProps<
     <div class={['question-content-base', props.class]}>
       <NP class="ti-name-with-score">
         <span
-          class="ti-name-text"
+          class="ti-name-text white-space-pre"
           innerHTML={globalTextHighlightProcessor(props.questionModel.tName || '', props.highLightTName)}
         ></span>
         <span class="score">({props.questionModel.scoreValue}分)</span>
@@ -47,7 +47,7 @@ export const ChoiceQuestionContent = functionalComponent<ChoiceQuestionContentPr
     >
       <div class="ti-choices">
         {props.questionModel.customQuestionInfo.choices?.map((y, yi) => (
-          <NText class={{ 'ti-choice-item': true, right: y.right, }}>
+          <NText class={{ 'ti-choice-item': true, 'white-space-pre': true, right: y.right, }}>
             <span>{getAToZ(yi)}.</span>
             <span innerHTML={globalTextHighlightProcessor(y.label, props.highLightTName)}></span>
           </NText>

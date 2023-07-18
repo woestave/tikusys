@@ -45,7 +45,7 @@ namespace API__Examsys__User {
   interface GetMyExamRes {
     list: Array<API__Examination.TableStruct__Examination & {
       /** 这次考试学生是否参与 */
-      isAnswered: boolean;
+      myExamResult: API__ExamResult.TableStruct__ExamResult | null;
     }>;
   }
 
@@ -64,11 +64,12 @@ namespace API__Examsys__User {
   /**
    * 通过试卷id查询该试卷所属的题列表
    */
-  interface GetTiListByPaperIdReq {
-    id: number;
+  interface GetStudentExamTiListReq {
+    exampaperId: number;
+    examinationId: number;
   }
-  interface GetTiListByPaperIdRes {
-    tiList: API__Tiku.TableStruct__Tiku[];
+  interface GetStudentExamTiListRes {
+    tiList: API__Tiku.TableStructWithExaming[];
   }
 
 

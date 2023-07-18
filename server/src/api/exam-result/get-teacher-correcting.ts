@@ -1,7 +1,7 @@
 import { Tables } from '#/mysql/tables';
 import { routePOST } from '#/routes/route';
 import { ERR_CODES, ERR_MESSAGES, ResponseStruct, getResponseStruct } from '#/utils/response-struct';
-import { selfFunction } from '../examsys/get-ti-list-by-paper-id';
+import { getTiListByPaperId } from '../examsys/get-ti-list-by-paper-id';
 
 export default routePOST<API__ExamResult.GetTeacherCorrectingReq, API__ExamResult.GetTeacherCorrectingRes>((context, next) => {
 
@@ -57,7 +57,7 @@ export default routePOST<API__ExamResult.GetTeacherCorrectingReq, API__ExamResul
   // const tiList = Tables.Tiku.select().where(Tables.Tiku.getTableFieldName('id', 'in', ))
 
   const tiList = targetExampaper
-    .then(res => selfFunction(res.paperId))
+    .then(res => getTiListByPaperId(res.paperId))
     .then((res) => {
     if (res instanceof ResponseStruct) {
       return Promise.reject(res);
@@ -94,7 +94,7 @@ export default routePOST<API__ExamResult.GetTeacherCorrectingReq, API__ExamResul
       examination,
       exampaper,
       tiList,
-      list: examResults.filter((x) => myStudentIds.includes(x.examResultStudentId)),
+      list: examResults.filter((x) => myStudentIds.includes(+x.examResultStudentId)),
       studentList,
     };
   });

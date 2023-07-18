@@ -16,9 +16,28 @@
   }
 
 
+
+
+
   .single-question-list {
+
+    .single-question-radio-group {
+      display: flex;
+      flex-direction: row;
+      height: auto;
+      .single-question-radio-button {
+        min-height: 100%;
+        height: auto;
+        white-space: pre;
+      }
+    }
+
     .n-radio-group__splitor--checked {
       display: none;
+    }
+    .n-radio-group__splitor {
+      min-height: 100%;
+      height: auto;
     }
     .single-question-radio-button {
       &.right {
@@ -35,6 +54,11 @@
       }
     }
   }
+
+
+
+
+
   .multi-question-list {
     .multi-question-checkbox {
       &.right .n-checkbox-box__border {

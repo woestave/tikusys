@@ -30,8 +30,9 @@ namespace API__ExamResult {
   //
   interface CreateReq {
     /** examinationId */
-    id: number;
-    choiceQuestionScore: number;
+    examinationId: number;
+    exampaperId: number;
+    // choiceQuestionScore: number;
     // examResultUsedTime: number;
     answerInfo: ExamResultAnswerInfoParsed;// TableStruct__ExamResult['examResultAnswerInfo'];
   }

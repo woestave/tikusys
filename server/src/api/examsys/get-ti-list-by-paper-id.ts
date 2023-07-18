@@ -1,9 +1,12 @@
 import { Tables } from '#/mysql/tables';
 import { routePOST } from '#/routes/route';
 import { responseStructPresets } from '#/utils/response-struct';
+import { BaseCustomQuestionInfo } from 'common-packages/models/question-model-base';
+import { ChoiceQuestionInfo, filterIsChoiceQuestion } from 'common-packages/models/question-model-choice';
 import querystring from 'querystring';
+import { omit } from 'ramda';
 
-export function selfFunction (paperId: number) {
+export function getTiListByPaperId (paperId: number) {
   const F = Tables
     .Relation__Exampaper__Tiku
     .select()
@@ -17,22 +20,8 @@ export function selfFunction (paperId: number) {
         tiList: tiList.map((x) => ({
           ...x,
           tName: querystring.unescape(x.tName || ''),
-          customQuestionInfo: JSON.parse(querystring.unescape(x.customQuestionInfo as any as string)),
+          customQuestionInfo: JSON.parse(querystring.unescape(x.customQuestionInfo as any as string)) as BaseCustomQuestionInfo,
         })),
       };
     });
 }
-
-/**
- * 通过试卷id查询所有试卷所属的题列表
- */
-export default routePOST<API__Examsys__User.GetTiListByPaperIdReq, API__Examsys__User.GetTiListByPaperIdRes>((context) => {
-  const userInfo = context.state.user as API__Examsys__User.GetUserInfoRes['userInfo'];
-  const body = context.request.body;
-
-  if (typeof body.id !== 'number') {
-    return responseStructPresets.reqBodyError;
-  }
-
-  return selfFunction(body.id);
-});

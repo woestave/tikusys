@@ -8,7 +8,9 @@ export function classUpdate (body: API__Class.UpdateReq) {
   return Tables
     .Class
     .update({
-      ...omit([idKey], body),
+      classMajor: body.classMajor,
+      className: body.className,
+      classType: body.classType,
       classTeacher: JSON.stringify(body.classTeacher),
     })
     .where(Tables.Class.getFieldName('id'), '=', body.id)

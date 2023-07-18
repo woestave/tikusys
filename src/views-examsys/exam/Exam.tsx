@@ -3,25 +3,39 @@ import examsysServices from '@/apis/services/examsys';
 import { useRequest } from '@/hooks/use-request';
 import { useCommonDataPinia } from '@/store/common-data.pinia';
 import { functionalComponent, useCallbackP } from '@/utils/functional-component';
+import { inExamTime } from 'common-packages/helpers/exam-utils';
 import { DataTableColumns, NButton, NDataTable, NH1 } from 'naive-ui';
 import { prop } from 'ramda';
 import { useRouter, } from 'vue-router';
 
-function getEndTime (targetTime: number, duration: number) {
-  return (targetTime + (duration * 60 * 1000));
-}
-/**
- * 判断当前时间是否在给定时间戳+给定持续时间之内
- */
-function inTime (targetTime: number, duration: number) {
-  return +new Date() > targetTime && +new Date() <= getEndTime(targetTime, duration);
-}
+
 
 export default functionalComponent(() => {
 
   const router = useRouter();
 
-  const [ examinationList, getExaminationList, getExaminationListStatus ] = useCallbackP(() => examsysServices.getMyExam().then((res) => res.data.list || []));
+  const [ examinationList, getExaminationList, getExaminationListStatus ] = useCallbackP(() => examsysServices
+    .getMyExam()
+    .then((res) => res.data.list || [])
+    .then((res) => res.map((x) => {
+      let examResultSQ_Marking: API__ExamResult.examResultSQ_MarkingParsed | null = null;
+      try {
+        if (x.myExamResult) {
+          const decoded = decodeURIComponent(x.myExamResult.examResultSQ_Marking);
+          if (decoded) {
+            examResultSQ_Marking = JSON.parse(decoded) as API__ExamResult.examResultSQ_MarkingParsed;
+          }
+        }
+      } catch (e) {}
+      return {
+        ...x,
+        myExamResult: x.myExamResult ? {
+          ...x.myExamResult,
+          examResultSQ_Marking,
+        } : null,
+      };
+    }))
+  );
 
   getExaminationList();
 
@@ -84,7 +98,7 @@ export default functionalComponent(() => {
             key: 'examDate',
             render (row) {
               const examDate = new Date(row.examDate);
-              const started = inTime(row.examDate, row.examDuration);
+              const started = inExamTime(row.examDate, row.examDuration);
               return (
                 <span
                   style={{
@@ -113,27 +127,41 @@ export default functionalComponent(() => {
             },
           },
           {
+            title: '分数',
+            key: '',
+            render (row) {
+              if (row.myExamResult) {
+                const SQ_Marking = row.myExamResult.examResultSQ_Marking || null;
+                const SQ_Scores = Object.keys(SQ_Marking || {}).reduce((score, currKey) => {
+                  return score + (SQ_Marking![+currKey] || 0);
+                }, 0);
+                return row.myExamResult.examResultChoiceQuestionScore + SQ_Scores;
+              }
+              return '-';
+            },
+          },
+          {
             title: '操作',
             key: '',
             render (row) {
-              const examing = inTime(row.examDate, row.examDuration);
+              const examing = inExamTime(row.examDate, row.examDuration);
               return (
                 <>
-                  {examing && <NButton
-                    type={examing ? 'primary' : 'default'}
+                  <NButton
+                    type={examing ? 'primary' : 'info'}
                     onClick={() => onExaming(row)}
-                  >开始考试</NButton>}
-                  {(getEndTime(row.examDate, row.examDuration) < +new Date()) && row.isAnswered && (
-                    <NButton
-                      type="info"
-                      onClick={() => onExaming(row)}
-                    >查看成绩</NButton>
-                  )}
+                  >{
+                    row.myExamResult
+                      ? '查看成绩'
+                      : examing
+                        ? '开始考试'
+                        : '查看'
+                  }</NButton>
                 </>
               );
             },
           },
-        ] as DataTableColumns<API__Examsys__User.GetMyExamRes['list'][0]>}
+        ] as DataTableColumns<NonNullable<(typeof examinationList)['value']>[number]>}
         loading={getExaminationListStatus.value === 'pending'}
       >
       </NDataTable>

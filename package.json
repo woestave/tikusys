@@ -66,6 +66,7 @@
     "blueimp-md5": "^2.19.0",
     "pinia": "^2.0.35",
     "ramda": "^0.29.0",
+    "ts-debounce-throttle": "^1.0.0",
     "vue3-smooth-dnd": "^0.0.5"
   }
 }

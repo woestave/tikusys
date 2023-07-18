@@ -39,12 +39,12 @@ export default function computeQuestionScores (
   const rightSingleScore = sum(singles.map(propScoreValue));
   /** 做对的多选题总分 */
   const rightMultiScore = sum(multiples.map(propScoreValue));
-  /** 简答题总分 */
-  const shortScore = sum(shorts.map(propScoreValue));
   /** 总分 */
   const totalScore = sum([...classifyQuestions.singles, ...classifyQuestions.multiples, ...classifyQuestions.shorts].map((x) => x.scoreValue) || []);
+  /** 简答题总分 */
+  const shortTotalScore = sum(shorts.map(propScoreValue));
   /** 选择题总分 */
-  const choiceTotalScore = totalScore - shortScore;
+  const choiceTotalScore = totalScore - shortTotalScore;
   /** 做对的选择题总分 */
   const rightChoicesTotalScore = rightSingleScore + rightMultiScore;
 
@@ -52,7 +52,7 @@ export default function computeQuestionScores (
     singles, multiples, shorts,
     rightSingleScore,
     rightMultiScore,
-    shortScore,
+    shortTotalScore,
     totalScore,
     choiceTotalScore,
     rightChoicesTotalScore,

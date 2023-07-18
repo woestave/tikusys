@@ -1,5 +1,8 @@
 namespace API__Tiku {
 
+  type ChoiceQuestionInfo = import('common-packages/models/question-model-choice').ChoiceQuestionInfo;
+  type ChoiceType = import('common-packages/models/question-model-choice').ChoiceType;
+
   interface BaseCustomQuestionInfo {
     questionType: import('common-packages/constants/question').QuestionType;
   }
@@ -15,12 +18,24 @@ namespace API__Tiku {
   type DefaultQuestionModel = QuestionModel<BaseCustomQuestionInfo>;
 
 
+  type ChoiceQuestionInfoWithExaming = Omit<ChoiceQuestionInfo, 'choices'> & {
+    choices: Omit<ChoiceType, 'right'>[];
+    isSingle: boolean;
+    isMulti: boolean;
+    questionType: QuestionType;
+  };
+
+
 
   interface TableOtherData {
     createTime: number;
     createBy: number;
   }
   interface TableStruct__Tiku extends TableOtherData, DefaultQuestionModel {}
+
+  interface TableStructWithExaming extends Omit<TableStruct__Tiku, 'customQuestionInfo'> {
+    customQuestionInfo: (BaseCustomQuestionInfo | ChoiceQuestionInfoWithExaming);
+  }
 
   interface TikuStructWithPaperInfo extends TableStruct__Tiku {
     paperInfo: Array<{

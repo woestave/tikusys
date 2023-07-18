@@ -78,14 +78,24 @@ export const getPartialChoiceQuestionModel = getPartialQuestionModelFactory<Choi
 /**
  * 判断该选择题是否属于单选题
  */
-export function filterSingleChoiceQuestion (questionModel: QuestionModel<BaseCustomQuestionInfo> | ChoiceQuestionModel) {
-  return questionTypeIs(questionModel, QuestionType.choiceQuestion) && (questionModel as ChoiceQuestionModel).customQuestionInfo.choices.filter(y => y.right).length === 1;
+export function filterSingleChoiceQuestion (questionModel: QuestionModel<BaseCustomQuestionInfo> | ChoiceQuestionModel | API__Tiku.TableStructWithExaming) {
+  return questionTypeIs(questionModel, QuestionType.choiceQuestion)
+    && (
+      (questionModel as ChoiceQuestionModel).customQuestionInfo.choices.filter(y => y.right).length === 1
+      ||
+      (questionModel.customQuestionInfo as API__Tiku.ChoiceQuestionInfoWithExaming)?.isSingle
+    );
 }
 /**
  * 判断该选择题是否属于多选题
  */
-export function filterMultiChoiceQuestion (questionModel: QuestionModel<BaseCustomQuestionInfo> | ChoiceQuestionModel) {
-  return questionTypeIs(questionModel, QuestionType.choiceQuestion) && (questionModel as ChoiceQuestionModel).customQuestionInfo.choices.filter(y => y.right).length > 1;
+export function filterMultiChoiceQuestion (questionModel: QuestionModel<BaseCustomQuestionInfo> | ChoiceQuestionModel | API__Tiku.TableStructWithExaming) {
+  return questionTypeIs(questionModel, QuestionType.choiceQuestion)
+    && (
+      (questionModel as ChoiceQuestionModel).customQuestionInfo.choices.filter(y => y.right).length > 1
+      ||
+      (questionModel.customQuestionInfo as API__Tiku.ChoiceQuestionInfoWithExaming)?.isMulti
+    );
 }
 
 

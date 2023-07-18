@@ -1,5 +1,6 @@
 .question-content-base {
   display: flex;
+  overflow: auto;
   &.row {
     flex-direction: row;
   }
@@ -11,6 +12,7 @@
     height: 100%;
     display: flex;
     align-items: center;
+    // justify-content: space-between;
     margin-bottom: 0;
     .ti-name-text {
       // font-weight: 500;
@@ -21,6 +23,8 @@
       }
     }
     .score {
+      flex-shrink: 0;
+      margin-left: 24px;
       font-size: 12px;
       font-weight: bold;
       color: gray;
@@ -44,6 +48,7 @@
   .ti-choices {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 
     .ti-choice-item {
       margin: 0 24px;
