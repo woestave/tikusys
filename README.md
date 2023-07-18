@@ -22,8 +22,5 @@ npm run build:online # 如果还没有安装依赖请先npm install
 解压完毕后，目录信息为
 ###### 前端 -> /www/wwwroot/tiku-server/online/dist/*
 ###### 后端 -> /www/wwwroot/tiku-server/online/server/server/*
-最后一步需要重启node服务，node服务使用pm2管理，以下两个重启操作选择一个：
-###### 1. 直接在终端输入 pm2 restart all
-###### 2. 登录宝塔管理页面 通过pm2软件管理页面 点击重启
 
 ##### 上线完成
