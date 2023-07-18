@@ -7,15 +7,17 @@
 ```
 npm run build:online # 如果还没有安装依赖请先npm install
 ```
-1. 等待执行完毕后项目根目录生成一个online文件夹
-online文件夹包含dist(前端目录)、server(服务端目录)
-最终生成online.zip
-将online.zip上传到服务器根目录的www/wwwroot/tiku-server目录中
+1. 等待执行完毕后项目根目录生成一个online文件夹，它包含dist(前端目录)、server(服务端目录)，
+最终会根据online文件夹生成online.zip
+只需将online.zip上传到服务器根目录的www/wwwroot/tiku-server目录中
 在阿里云终端的/tiku-server目录输入如下命令：
 ```
 rm -rf online // 删除online文件夹(如果有)
-unzip online.zip // 解压online.zip到当前文件夹
+./online.sh // 执行上线脚本（前提确保文件夹内存在online.zip）
 ```
+##### 注 online.sh会生成一个backup.zip， 它是上一个线上版本的备份。如果新上线的版本出现紧急的恶性bug，可以通过删除online.zip并将backup.zip改名为online.zip然后执行./online.sh的方式来回滚代码
+
+
 解压完毕后，目录信息为
 ###### 前端 -> /www/wwwroot/tiku-server/online/dist/*
 ###### 后端 -> /www/wwwroot/tiku-server/online/server/server/*
